@@ -29,6 +29,7 @@ repositories {
 
 dependencies {
     appengineSdk "com.google.appengine:appengine-java-sdk:1.9.59"
+    compile 'com.google.cloud:google-cloud-pubsub:1.35.0'
 
     compile 'javax.servlet:javax.servlet-api:3.1.0'
     compile group: 'javax.jdo', name: 'jdo2-api', version: '2.3-20090302111651'

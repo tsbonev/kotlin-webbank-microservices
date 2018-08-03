@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<queue-entries>
+    <queue>
+        <name>mailing-queue</name>
+        <rate>1/s</rate>
+        <bucket-size>40</bucket-size>
+        <max-concurrent-requests>1</max-concurrent-requests>
+    </queue>
+</queue-entries>

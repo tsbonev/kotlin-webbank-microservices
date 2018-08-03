@@ -18,7 +18,6 @@ class LoginFilter(private val sessionProvider: SessionProvider) : Filter {
             halt(HttpStatus.FORBIDDEN_403)
             response.redirect("/user")
         }catch (e: SessionNotFoundException){
-            println("------NO SESSION FOUND")
             response.redirect("/")
         }
     }
