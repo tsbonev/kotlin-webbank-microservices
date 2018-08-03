@@ -17,8 +17,8 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
                      private val instant: LocalDateTime = LocalDateTime.now()) : Filter {
 
     private fun redirectToLogin(res: Response) {
-        halt(HttpStatus.UNAUTHORIZED_401)
-        res.redirect("/login")
+        /*halt(HttpStatus.UNAUTHORIZED_401)
+        res.redirect("/login")*/
     }
 
     override fun handle(req: Request, res: Response) {

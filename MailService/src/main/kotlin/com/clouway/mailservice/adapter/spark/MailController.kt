@@ -1,5 +1,8 @@
 package com.clouway.mailservice.adapter.spark
 
+import com.google.appengine.repackaged.com.google.gson.Gson
+import com.google.pubsub.v1.PubsubMessage
+import org.eclipse.jetty.http.HttpStatus
 import spark.Request
 import spark.Response
 import spark.Route
@@ -19,11 +22,12 @@ import javax.mail.internet.MimeMessage
 class MailController : Route {
     override fun handle(request: Request, response: Response): Any {
 
-        println("-------- EMAIL REQUEST RECEIVED--------")
-
         val properties = Properties()
         val session = Session.getDefaultInstance(properties, null)
-        val email = request.queryParams("email")
+
+        val gson = Gson()
+        val message = gson.fromJson(request.body(), PubsubMessage::class.java)
+        val email = message.data.toStringUtf8()
 
         return try{
             val msg = MimeMessage(session)
@@ -31,15 +35,19 @@ class MailController : Route {
                     "Sacred union Admin"))
             msg.addRecipient(Message.RecipientType.TO,
                     InternetAddress(email, "Mr. User"))
-            msg.subject = "Your request has been received"
-            msg.setText("This is a test")
+            msg.subject = "Push subscriber welcomes you to the spark bank!"
+            msg.setText("This is a test email sent by the Push Subscriber")
             Transport.send(msg)
+            response.status(HttpStatus.OK_200)
         }catch (e: AddressException){
             e.printStackTrace()
+            response.status(HttpStatus.BAD_REQUEST_400)
         }catch (e: MessagingException){
             e.printStackTrace()
+            response.status(HttpStatus.BAD_REQUEST_400)
         }catch (e: UnsupportedEncodingException){
             e.printStackTrace()
+            response.status(HttpStatus.BAD_REQUEST_400)
         }
     }
 }

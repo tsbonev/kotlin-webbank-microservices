@@ -32,8 +32,8 @@ class RegisterController(private val userRepo: UserRepository,
                     .registerIfNotExists(
                             transformer.fromJson(request.body(),
                                     UserRegistrationRequest::class.java))
-            response.status(HttpStatus.CREATED_201)
             support.firePropertyChange("registration", null, user.username)
+            response.status(HttpStatus.CREATED_201)
         }catch (e: UserAlreadyExistsException){
             response.status(HttpStatus.BAD_REQUEST_400)
         }

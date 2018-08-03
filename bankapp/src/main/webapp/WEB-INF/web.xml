@@ -6,7 +6,6 @@
          version="2.5">
     <display-name>Spark on GAE demo</display-name>
 
-
     <filter>
         <filter-name>SparkFilter</filter-name>
         <filter-class>spark.servlet.SparkFilter</filter-class>
