@@ -5,7 +5,6 @@ import com.clouway.bankapp.adapter.gae.datastore.DatastoreUserRepository
 import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
 import com.clouway.bankapp.adapter.spark.*
 import com.clouway.bankapp.core.GsonSerializer
-import com.clouway.bankapp.core.security.LoginFilter
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
 import com.google.appengine.api.memcache.MemcacheServiceFactory
@@ -29,7 +28,6 @@ class AppBootstrap : SparkApplication{
         val sessionLoader = MemcacheSessionRepository(sessionRepo, jsonSerializer)
 
         val securityFilter = SecurityFilter(sessionLoader, sessionProvider)
-        val loginFilter = LoginFilter(sessionProvider)
 
         val registerListener = RegisterListener()
 
@@ -48,9 +46,6 @@ class AppBootstrap : SparkApplication{
 
 
         before(securityFilter)
-
-        before("/login", loginFilter)
-        before("/register", loginFilter)
 
         after(Filter {req, res ->
             res.type("application/json")
