@@ -21,14 +21,14 @@ import javax.mail.internet.MimeMessage
  */
 class MailSubscriber {
 
-    private fun sendMail(email: String){
+    /*private fun sendMail(email: String){
         val properties = Properties()
         val session = Session.getDefaultInstance(properties, null)
 
         return try{
             val msg = MimeMessage(session)
             msg.setFrom(InternetAddress("anything@sacred-union-210613.appspotmail.com",
-                    "Sacred union Admin"))
+                    "Sacred union pull Admin"))
             msg.addRecipient(Message.RecipientType.TO,
                     InternetAddress(email, "Mr. User"))
             msg.subject = "Pull subscriber welcomes you to the spark bank!"
@@ -69,5 +69,5 @@ class MailSubscriber {
         }finally {
                 subscriber.stopAsync()
         }
-    }
+    }*/
 }

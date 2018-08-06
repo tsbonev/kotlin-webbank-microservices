@@ -1,11 +1,8 @@
 package server
 
-import com.clouway.mailservice.adapter.gae.MailSubscriber
 import com.clouway.mailservice.adapter.spark.MailController
-import spark.Route
 import spark.Spark.get
 import spark.Spark.post
-import spark.kotlin.get
 import spark.servlet.SparkApplication
 
 /**
@@ -14,12 +11,15 @@ import spark.servlet.SparkApplication
 class AppBootstrap : SparkApplication {
     override fun init() {
 
-        val mailSubscriber = MailSubscriber()
-
         post("/api/v1/mail", MailController())
+        post("/_ah/push-handlers/mail", MailController())
 
         get("/hello") { req, res ->
             "Hello from mail service"
+        }
+
+        get("/hello2") { req, res ->
+            "Hello from mail service new version"
         }
 
     }
