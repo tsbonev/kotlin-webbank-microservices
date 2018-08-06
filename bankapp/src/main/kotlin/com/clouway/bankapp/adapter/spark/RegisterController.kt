@@ -26,7 +26,7 @@ class RegisterController(private val userRepo: UserRepository,
         support.removePropertyChangeListener(plc)
     }
 
-    override fun handle(request: Request, response: Response): Any? {
+    override fun handle(request: Request, response: Response): Any {
         return try{
             val user = userRepo
                     .registerIfNotExists(

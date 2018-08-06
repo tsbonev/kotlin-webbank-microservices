@@ -35,7 +35,7 @@ class MailController : Route {
             msg.setFrom(InternetAddress("anything@sacred-union-210613.appspotmail.com",
                     "Sacred union push Admin"))
             msg.addRecipient(Message.RecipientType.TO,
-                    InternetAddress(email, "Mr. User $email"))
+                    InternetAddress(email, "Mr. User"))
             msg.subject = "Push subscriber welcomes you to the spark bank!"
             msg.setText("This is a test email sent by the Push Subscriber")
             Transport.send(msg)

@@ -11,7 +11,6 @@ import spark.servlet.SparkApplication
 class AppBootstrap : SparkApplication {
     override fun init() {
 
-        post("/api/v1/mail", MailController())
         post("/_ah/push-handlers/mail", MailController())
 
         get("/hello") { req, res ->

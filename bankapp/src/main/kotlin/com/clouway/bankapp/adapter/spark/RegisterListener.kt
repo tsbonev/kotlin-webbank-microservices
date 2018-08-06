@@ -22,10 +22,6 @@ class RegisterListener : PropertyChangeListener {
     override fun propertyChange(p0: PropertyChangeEvent) {
         val email = p0.newValue as String
 
-        /*val queue = QueueFactory.getQueue("mailing-queue")
-        queue.add(TaskOptions.Builder.withUrl("/api/v1/mail")
-                .param("email", email))*/
-
         val projectId = ServiceOptions.getDefaultProjectId()
 
         val topicId = "register-mailing"
