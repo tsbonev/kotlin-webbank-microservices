@@ -22,18 +22,21 @@ class PubsubJsonTest {
     """.trimIndent()
 
     data class PubsubMessageWrapper(val attributes: Any, val data: String, val message_id: String)
-    data class PubsubWrapper(val message: PubsubMessageWrapper, val subscription: String)
+    data class PubsubCustomWrapper(val message: PubsubMessageWrapper, val subscription: String)
+    data class PubsubWrapper(val message: PubsubMessage, val subscription: String)
 
 
     @Test
     fun convertToPubsubMessage(){
         val wholeMessage = Gson().fromJson(json, PubsubMessage::class.java)
-        val message = Gson().fromJson(json, PubsubWrapper::class.java)
+        val wrappedMessage = Gson().fromJson(json, PubsubWrapper::class.java)
+        val customMessage = Gson().fromJson(json, PubsubCustomWrapper::class.java)
 
-        val decodedData = String(Base64.decode(message.message.data))
+        val decodedData = String(Base64.decode(customMessage.message.data))
 
         println(wholeMessage)
-        println(message.message.data)
+        println(wrappedMessage)
+        println(customMessage.message.data)
         println(decodedData)
     }
 
