@@ -71,5 +71,4 @@ class MemcacheSessionTest {
 
         cachedSessionHandler.getSessionAvailableAt(session.sessionId, now)
     }
-
 }

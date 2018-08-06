@@ -45,7 +45,6 @@ class RegisterListener : PropertyChangeListener {
                         println(exception.statusCode)
                     }
                 }
-
             })
         }finally {
             publisher.shutdown()

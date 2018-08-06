@@ -8,7 +8,5 @@ import spark.Response
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 interface SecureController {
-
     fun handle(request: Request, response: Response, currentSession: Session): Any?
-
 }

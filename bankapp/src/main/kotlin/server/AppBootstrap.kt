@@ -95,6 +95,5 @@ class AppBootstrap : SparkApplication{
 
         post("/logout", SecuredController(logoutController, sessionProvider),
                 responseTransformer)
-
     }
 }

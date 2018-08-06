@@ -19,5 +19,4 @@ interface UserRepository {
     fun registerIfNotExists(registerRequest: UserRegistrationRequest) : User
 
     fun checkPassword(user: User): Boolean
-
 }

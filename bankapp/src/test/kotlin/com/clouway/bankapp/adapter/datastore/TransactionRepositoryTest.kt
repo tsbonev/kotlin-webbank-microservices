@@ -72,5 +72,4 @@ class TransactionRepositoryTest {
                 .getUserTransactions(1, 4, 3)
                 .size, Is(1))
     }
-
 }

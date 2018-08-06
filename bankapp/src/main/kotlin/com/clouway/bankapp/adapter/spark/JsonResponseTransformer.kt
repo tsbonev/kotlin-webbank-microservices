@@ -11,5 +11,4 @@ class JsonResponseTransformer(private val transformer: JsonSerializer) : Respons
     override fun render(model: Any): String {
         return transformer.toJson(model)
     }
-
 }

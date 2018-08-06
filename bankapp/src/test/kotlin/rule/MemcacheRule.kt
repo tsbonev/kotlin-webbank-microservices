@@ -18,5 +18,4 @@ class MemcacheRule : ExternalResource() {
     override fun after() {
         helper.tearDown()
     }
-
 }

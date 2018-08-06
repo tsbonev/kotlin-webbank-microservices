@@ -133,5 +133,4 @@ class TransactionSystemTest {
         assertThat(statusReturn == HttpStatus.UNAUTHORIZED_401, Is(true))
 
     }
-
 }

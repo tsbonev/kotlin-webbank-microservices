@@ -22,10 +22,6 @@ class RegisterController(private val userRepo: UserRepository,
         support.addPropertyChangeListener(plc)
     }
 
-    fun removePropertyChangeListener(plc: PropertyChangeListener){
-        support.removePropertyChangeListener(plc)
-    }
-
     override fun handle(request: Request, response: Response): Any {
         return try{
             val user = userRepo
@@ -38,5 +34,4 @@ class RegisterController(private val userRepo: UserRepository,
             response.status(HttpStatus.BAD_REQUEST_400)
         }
     }
-
 }

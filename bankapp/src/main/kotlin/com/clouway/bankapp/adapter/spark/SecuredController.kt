@@ -20,6 +20,5 @@ class SecuredController(private val controller: SecureController,
         } catch (e: SessionNotFoundException) {
             response.status(HttpStatus.UNAUTHORIZED_401)
         }
-
     }
 }

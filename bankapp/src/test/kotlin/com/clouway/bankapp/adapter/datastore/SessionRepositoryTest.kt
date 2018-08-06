@@ -81,5 +81,4 @@ class SessionRepositoryTest {
                 getSessionAvailableAt("fakeSID", LocalDateTime.now())
                 .isPresent, Is(false))
     }
-
 }

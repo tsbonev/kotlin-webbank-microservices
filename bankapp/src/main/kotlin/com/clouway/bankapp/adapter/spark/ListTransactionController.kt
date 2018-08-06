@@ -18,5 +18,4 @@ class ListTransactionController(private val transactionRepo: TransactionReposito
         response.status(HttpStatus.OK_200)
         return transactions
     }
-
 }

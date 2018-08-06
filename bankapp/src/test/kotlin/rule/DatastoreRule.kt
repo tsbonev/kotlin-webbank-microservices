@@ -18,5 +18,4 @@ class DatastoreRule : ExternalResource() {
     override fun after() {
         helper.tearDown()
     }
-
 }

@@ -1,4 +1,4 @@
-package com.clouway.bankapp.adapter.spark
+package com.clouway.mailservice.adapter.spark
 
 import spark.Request
 import spark.Response

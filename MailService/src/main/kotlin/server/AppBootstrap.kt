@@ -1,6 +1,8 @@
 package server
 
+import com.clouway.mailservice.adapter.gae.PubsubDataReader
 import com.clouway.mailservice.adapter.spark.MailController
+import com.clouway.mailservice.adapter.spark.PubsubController
 import spark.Spark.get
 import spark.Spark.post
 import spark.servlet.SparkApplication
@@ -11,15 +13,13 @@ import spark.servlet.SparkApplication
 class AppBootstrap : SparkApplication {
     override fun init() {
 
-        post("/_ah/push-handlers/mail", MailController())
+        val dataReader = PubsubDataReader()
+        val mailController = MailController()
+
+        post("/_ah/push-handlers/mail", PubsubController(mailController, dataReader))
 
         get("/hello") { req, res ->
             "Hello from mail service"
         }
-
-        get("/hello2") { req, res ->
-            "Hello from mail service new version"
-        }
-
     }
 }
