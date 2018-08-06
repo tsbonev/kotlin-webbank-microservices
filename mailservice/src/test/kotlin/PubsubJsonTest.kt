@@ -39,5 +39,4 @@ class PubsubJsonTest {
         println(customMessage.message.data)
         println(decodedData)
     }
-
 }

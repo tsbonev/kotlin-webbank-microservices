@@ -19,8 +19,8 @@
     <!-- Other Modules -->
     <module>
         <web>
-            <web-uri>MailService-1.0-SNAPSHOT</web-uri>
-            <context-root>MailService</context-root>
+            <web-uri>mailservice-1.0-SNAPSHOT</web-uri>
+            <context-root>mailservice</context-root>
         </web>
     </module>
 

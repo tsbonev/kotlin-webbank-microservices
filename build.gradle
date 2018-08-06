@@ -35,7 +35,6 @@ subprojects {
         compile 'com.google.cloud:google-cloud-pubsub:1.35.0'
 
         compile 'javax.servlet:javax.servlet-api:3.1.0'
-        compile group: 'javax.jdo', name: 'jdo2-api', version: '2.3-20090302111651'
 
         compile "com.google.appengine:appengine-api-1.0-sdk:1.9.59"
         compile "com.google.appengine:appengine-tools-sdk:1.9.59"
@@ -45,7 +44,6 @@ subprojects {
         compile 'com.sparkjava:spark-core:2.5.4'
         compile "com.sparkjava:spark-kotlin:1.0.0-alpha"
         compile 'org.slf4j:slf4j-simple:1.7.25'
-        compile 'com.sparkjava:spark-template-thymeleaf:2.3'
         compile 'org.jetbrains.kotlin:kotlin-stdlib-jdk8'
         compile 'org.jetbrains.kotlin:kotlin-reflect:1.2.51'
         compile 'org.apache.commons:commons-lang3:3.7'
@@ -62,7 +60,7 @@ subprojects {
 dependencies {
     appengineSdk "com.google.appengine:appengine-java-sdk:1.9.59"
     deploy project(path: ':bankapp', configuration: 'archives')
-    deploy project(path: ':MailService', configuration: 'archives')
+    deploy project(path: ':mailservice', configuration: 'archives')
 
 }
 

@@ -37,20 +37,19 @@ class MailSystemTest {
     private val mockDataReader = context.mock(DataReader::class.java)
     private val mockMailer = context.mock(Mailer::class.java)
     private val mockRequest = context.mock(HttpServletRequest::class.java)
+
     private val mailController = MailController(mailer = mockMailer)
     private val pubsubController = PubsubController(mailController, mockDataReader)
 
-    private val dataReader = PubsubDataReader()
-
     private val messageJson = """
-        {
-  "message": {
-    "attributes": {
-      "key": "value"
-    },
-    "data": "dHNib25ldkBnbWFpbC5jb20=",
-    "message_id": "136969346945"
-    },
+    {
+    "message": {
+        "attributes": {
+            "key": "value"
+            },
+        "data": "dHNib25ldkBnbWFpbC5jb20=",
+        "message_id": "136969346945"
+        },
     "subscription": "projects/myproject/subscriptions/mysubscription"
     }
     """.trimIndent()
@@ -60,15 +59,15 @@ class MailSystemTest {
     private val servletInputStream = object: ServletInputStream(){
 
         override fun setReadListener(readListener: ReadListener?) {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
 
         override fun isFinished(): Boolean {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
 
         override fun isReady(): Boolean {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
 
         override fun read(): Int {
@@ -114,6 +113,8 @@ class MailSystemTest {
     @Test
     fun shouldDecodeDataAndSendMail(){
 
+        val dataReader = PubsubDataReader()
+
         context.expecting {
             oneOf(mockRequest).inputStream
             will(returnValue(servletInputStream))
@@ -125,7 +126,5 @@ class MailSystemTest {
 
         val pubsubController = PubsubController(mailController, dataReader)
         assertThat(pubsubController.handle(req, res) == HttpStatus.OK_200, Is(true))
-
     }
-
 }
