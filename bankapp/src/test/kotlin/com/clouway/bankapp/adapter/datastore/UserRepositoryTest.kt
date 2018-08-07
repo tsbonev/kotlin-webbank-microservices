@@ -21,8 +21,8 @@ class UserRepositoryTest {
 
     private val userRepo = DatastoreUserRepository()
 
-    private val registerJohn = UserRegistrationRequest("John", "password")
-    private val userJohn = User(1, "John", "password")
+    private val registerJohn = UserRegistrationRequest("John", "email", "password")
+    private val userJohn = User(1, "John", "email", "password")
 
     @Test
     fun shouldRegisterUser(){
@@ -61,7 +61,7 @@ class UserRepositoryTest {
     @Test
     fun verifyCorrectPassword(){
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
 
         assertThat(userRepo.checkPassword(userJohn), Is(true))
     }
@@ -69,9 +69,9 @@ class UserRepositoryTest {
     @Test
     fun invalidateIncorrectPassword(){
 
-        val userJohn = User(1, "John", "incorrect password")
+        val userJohn = User(1, "John", "email", "incorrect password")
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
 
         assertThat(userRepo.checkPassword(userJohn), Is(false))
     }
@@ -79,7 +79,7 @@ class UserRepositoryTest {
     @Test
     fun shouldDeleteUser(){
 
-        val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "password"))
+        val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
 
         assertThat(userRepo.getById(user.id).isPresent, Is(true))
 
@@ -90,9 +90,9 @@ class UserRepositoryTest {
     @Test
     fun shouldUpdateUser(){
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
 
-        val userJohn = User(1, "Don", "password")
+        val userJohn = User(1, "Don", "email", "password")
 
         userRepo.update(userJohn)
 

@@ -24,9 +24,12 @@ class SessionRepositoryTest {
     private val yesterday =  LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
     private val sessionRepo = DatastoreSessionRepository(instant = now, sessionRefreshDays = 1)
 
-    private val activeSession = Session(1, "123", tomorrow, "John", true)
-    private val activeSessionRequest = SessionRequest(1, "123", "John", tomorrow)
-    private val expiredSessionRequest = SessionRequest(1, "1234", "John", yesterday)
+    private val activeSession = Session(1, "123", tomorrow, "John",
+            "email", true)
+    private val activeSessionRequest = SessionRequest(1, "123", "John",
+            "email", tomorrow)
+    private val expiredSessionRequest = SessionRequest(1, "1234", "John",
+            "email", yesterday)
     @Test
     fun shouldRegisterSession(){
 

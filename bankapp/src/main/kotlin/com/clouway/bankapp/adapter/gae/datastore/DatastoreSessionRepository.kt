@@ -22,6 +22,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                 typedEntity.string("sessionId"),
                 typedEntity.dateTimeValueOrNull("expiresOn")!!,
                 typedEntity.string("username"),
+                typedEntity.string("userEmail"),
                 typedEntity.booleanValueOr("isAuthenticated", false)
         )
     }
@@ -32,6 +33,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         typedEntity.setIndexedProperty("sessionId", session.sessionId)
         typedEntity.setIndexedProperty("userId", session.userId)
         typedEntity.setIndexedProperty("username", session.username)
+        typedEntity.setIndexedProperty("userEmail", session.userEmail)
         typedEntity.setUnindexedProperty("isAuthenticated", session.isAuthenticated)
         return typedEntity.raw()
     }
@@ -71,6 +73,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                     sessionRequest.sessionId,
                     sessionRequest.expiration,
                     sessionRequest.username,
+                    sessionRequest.userEmail,
                     true
             )
 
@@ -88,7 +91,8 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                     typedSession.longValue("userId"),
                     typedSession.string("sessionId"),
                     instant.plusDays(sessionRefreshDays),
-                    typedSession.string("username")
+                    typedSession.string("username"),
+                    typedSession.string("userEmail")
             )
             service.put(mapSessionToEntity(key, refreshedSession))
         }catch (e: EntityNotFoundException){

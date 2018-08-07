@@ -11,7 +11,7 @@ buildscript {
 
     dependencies {
         classpath "com.google.appengine:gradle-appengine-plugin:1.9.59"
-        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.51'
+        classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.60'
     }
 }
 
@@ -62,7 +62,6 @@ dependencies {
     deploy project(path: ':bankapp', configuration: 'archives')
     deploy project(path: ':mailservice', configuration: 'archives')
     deploy project(path: ':pubsub', configuration: 'archives')
-
 }
 
 appengine {

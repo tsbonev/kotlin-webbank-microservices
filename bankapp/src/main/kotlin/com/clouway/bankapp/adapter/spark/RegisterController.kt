@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.spark
 
+import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.JsonSerializer
 import com.clouway.bankapp.core.UserAlreadyExistsException
 import com.clouway.bankapp.core.UserRegistrationRequest
@@ -14,13 +15,8 @@ import java.beans.PropertyChangeSupport
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class RegisterController(private val userRepo: UserRepository,
-                         private val transformer: JsonSerializer) : Controller {
-
-    private val support : PropertyChangeSupport by lazy { PropertyChangeSupport(this) }
-
-    fun addPropertyChangeListener(plc: PropertyChangeListener){
-        support.addPropertyChangeListener(plc)
-    }
+                         private val transformer: JsonSerializer,
+                         private val listeners: UserChangeListener) : Controller {
 
     override fun handle(request: Request, response: Response): Any {
         return try{
@@ -28,7 +24,7 @@ class RegisterController(private val userRepo: UserRepository,
                     .registerIfNotExists(
                             transformer.fromJson(request.body(),
                                     UserRegistrationRequest::class.java))
-            support.firePropertyChange("registration", null, user.username)
+            listeners.onRegistration(user)
             response.status(HttpStatus.CREATED_201)
         }catch (e: UserAlreadyExistsException){
             response.status(HttpStatus.BAD_REQUEST_400)

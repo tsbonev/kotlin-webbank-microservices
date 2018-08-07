@@ -1,12 +1,17 @@
 package server
+
 import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessionRepository
 import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactionRepository
 import com.clouway.bankapp.adapter.gae.datastore.DatastoreUserRepository
 import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
+import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
+import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
 import com.clouway.bankapp.core.GsonSerializer
+import com.clouway.bankapp.core.User
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
+import com.clouway.pubsub.factory.EventBusFactory
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 import spark.Filter
 import spark.Route
@@ -29,16 +34,26 @@ class AppBootstrap : SparkApplication{
 
         val securityFilter = SecurityFilter(sessionLoader, sessionProvider)
 
-        val registerListener = RegisterListener()
+        val eventPublisher = EventBusFactory.createAsyncPubsubEventBus()
+        val asyncEventListener = AsyncUserChangeListener(eventPublisher)
 
-        val registerController = RegisterController(userRepo, jsonSerializer)
+        val userChangeListeners = object: UserChangeListener{
+            val listeners = listOf(asyncEventListener)
+            override fun onRegistration(user: User) {
+                listeners.forEach { it.onRegistration(user) }
+            }
+
+            override fun onLogout(username: String, email: String) {
+                listeners.forEach { it.onLogout(username, email) }
+            }
+        }
+
+        val registerController = RegisterController(userRepo, jsonSerializer, userChangeListeners)
         val listTransactionController = ListTransactionController(transactionRepo)
         val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer)
         val loginController = LoginController(userRepo, sessionLoader, jsonSerializer)
         val userController = UserController()
-        val logoutController = LogoutController(sessionLoader)
-
-        registerController.addPropertyChangeListener(registerListener)
+        val logoutController = LogoutController(sessionLoader, userChangeListeners)
 
         before(Filter { req, res ->
             res.raw().characterEncoding = "UTF-8"

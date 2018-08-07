@@ -25,7 +25,7 @@ class LoginController(private val userRepo: UserRepository,
 
     override fun handle(request: Request, response: Response): Any? {
 
-        val loginRequest = transformer.fromJson(request.body(), UserRegistrationRequest::class.java)
+        val loginRequest = transformer.fromJson(request.body(), UserLoginRequest::class.java)
 
         val actualUser = userRepo.getByUsername(loginRequest.username)
 
@@ -43,6 +43,7 @@ class LoginController(private val userRepo: UserRepository,
                     user.id,
                     SID,
                     user.username,
+                    user.email,
                     getExpirationDate()
             ))
 

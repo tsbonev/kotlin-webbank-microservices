@@ -1,10 +1,11 @@
 package adapter.spark
 
-import com.clouway.mailservice.adapter.gae.PubsubDataReader
-import com.clouway.mailservice.adapter.spark.MailController
-import com.clouway.mailservice.adapter.spark.PubsubController
-import com.clouway.mailservice.core.DataReader
+import com.clouway.mailservice.adapter.spark.UserRegistrationHandler
 import com.clouway.mailservice.core.Mailer
+import com.clouway.pubsub.core.EventBus
+import com.clouway.pubsub.core.event.Event
+import com.clouway.pubsub.core.event.EventHandler
+import com.clouway.pubsub.core.event.UserRegisteredEvent
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.returnValue
 import org.jmock.Expectations
@@ -16,10 +17,8 @@ import org.hamcrest.CoreMatchers.`is` as Is
 import org.junit.Assert.assertThat
 import spark.Request
 import spark.Response
-import java.io.InputStream
-import javax.servlet.ReadListener
-import javax.servlet.ServletInputStream
-import javax.servlet.http.HttpServletRequest
+import spark.Route
+import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
@@ -33,57 +32,35 @@ class MailSystemTest {
     private fun Mockery.expecting(block: Expectations.() -> Unit){
             checking(Expectations().apply(block))
     }
-    
-    private val mockDataReader = context.mock(DataReader::class.java)
+
     private val mockMailer = context.mock(Mailer::class.java)
-    private val mockRequest = context.mock(HttpServletRequest::class.java)
 
-    private val mailController = MailController(mailer = mockMailer)
-    private val pubsubController = PubsubController(mailController, mockDataReader)
+    private val mailHandler = UserRegistrationHandler(mockMailer)
 
-    private val messageJson = """
-    {
-    "message": {
-        "attributes": {
-            "key": "value"
-            },
-        "data": "dHNib25ldkBnbWFpbC5jb20=",
-        "message_id": "136969346945"
-        },
-    "subscription": "projects/myproject/subscriptions/mysubscription"
-    }
-    """.trimIndent()
-
-    private val messageStream: InputStream = messageJson.byteInputStream()
-
-    private val servletInputStream = object: ServletInputStream(){
-
-        override fun setReadListener(readListener: ReadListener?) {
-            TODO("not implemented")
+    private val fakeEventBus = object: EventBus{
+        override fun publish(event: Event, eventType: Class<*>, topic: String) {
+            throw NotImplementedException()
         }
 
-        override fun isFinished(): Boolean {
-            TODO("not implemented")
+        override fun register(handlers: Map<Class<*>, EventHandler>): Route {
+            return Route { _, _ ->
+                req.attribute("event", testUserRegisteredEvent)
+                mailHandler.handle(req, res)
+            }
         }
 
-        override fun isReady(): Boolean {
-            TODO("not implemented")
+        override fun subscribe(topic: String, subscription: String, endpoint: String) {
+            throw NotImplementedException()
         }
 
-        override fun read(): Int {
-            return messageStream.read()
-        }
     }
 
-    private var attributeHolder: String = ""
+    private val testUserRegisteredEvent = UserRegisteredEvent(123, "::username::", "::email::")
+    private lateinit var attributeHolder: Event
 
     private val req = object: Request(){
-        override fun raw(): HttpServletRequest {
-            return mockRequest
-        }
-
-        override fun attribute(attribute: String?, value: Any?) {
-            attributeHolder = value!! as String
+        override fun attribute(attribute: String, value: Any) {
+            attributeHolder = value as Event
         }
 
         override fun <T : Any?> attribute(attribute: String?): T {
@@ -96,35 +73,18 @@ class MailSystemTest {
     }
 
     @Test
-    fun shouldSendMail(){
+    fun eventBusShouldUseHandlerAndSendMail(){
 
         context.expecting {
-            oneOf(mockDataReader).readData(mockRequest)
-            will(returnValue("tsbonev@gmail.com"))
-            oneOf(mockMailer).mail("tsbonev@gmail.com",
+            oneOf(mockMailer).mail(testUserRegisteredEvent.email,
                     "Welcome to the spark bank",
                     "This was sent via a push pubsub")
             will(returnValue(HttpStatus.OK_200))
         }
 
-        assertThat(pubsubController.handle(req, res) == HttpStatus.OK_200, Is(true))
+        val route = fakeEventBus.register(mapOf(UserRegisteredEvent::class.java to mailHandler))
+
+        assertThat(route.handle(req, res) as Int, Is(HttpStatus.OK_200))
     }
-
-    @Test
-    fun shouldDecodeDataAndSendMail(){
-
-        val dataReader = PubsubDataReader()
-
-        context.expecting {
-            oneOf(mockRequest).inputStream
-            will(returnValue(servletInputStream))
-            oneOf(mockMailer).mail("tsbonev@gmail.com",
-                    "Welcome to the spark bank",
-                    "This was sent via a push pubsub")
-            will(returnValue(HttpStatus.OK_200))
-        }
-
-        val pubsubController = PubsubController(mailController, dataReader)
-        assertThat(pubsubController.handle(req, res) == HttpStatus.OK_200, Is(true))
-    }
+    
 }

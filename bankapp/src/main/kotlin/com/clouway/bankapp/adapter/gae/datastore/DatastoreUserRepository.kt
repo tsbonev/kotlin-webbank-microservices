@@ -16,6 +16,7 @@ class DatastoreUserRepository : UserRepository {
         return User(
                 typedEntity.longValue("id"),
                 typedEntity.string("username"),
+                typedEntity.string("email"),
                 typedEntity.stringOr("password", "")
         )
     }
@@ -25,6 +26,7 @@ class DatastoreUserRepository : UserRepository {
         typedEntity.setUnindexedProperty("password", user.password)
         typedEntity.setIndexedProperty("id", user.id)
         typedEntity.setIndexedProperty("username", user.username)
+        typedEntity.setIndexedProperty("email", user.email)
         return typedEntity.raw()
     }
 
@@ -94,6 +96,7 @@ class DatastoreUserRepository : UserRepository {
                 .leastSignificantBits
                     .absoluteValue,
                 registerRequest.username,
+                registerRequest.email,
                 registerRequest.password)
 
         if (checkIfUserExists(registerRequest.username)) {

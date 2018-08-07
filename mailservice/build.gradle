@@ -2,4 +2,5 @@ apply plugin: 'war'
 
 dependencies {
     compile project (':pubsub')
+    compile 'com.sendgrid:sendgrid-java:4.0.1'
 }
