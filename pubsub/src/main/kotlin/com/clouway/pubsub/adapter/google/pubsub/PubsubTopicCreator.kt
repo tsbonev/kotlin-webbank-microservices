@@ -11,6 +11,7 @@ import com.google.cloud.pubsub.v1.TopicAdminClient
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 internal class PubsubTopicCreator : TopicCreator {
+    
     override fun create(topic: String) {
         try{
             TopicAdminClient.create().use { topicAdminClient ->

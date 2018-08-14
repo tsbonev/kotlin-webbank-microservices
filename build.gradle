@@ -16,6 +16,7 @@ buildscript {
 }
 
 allprojects {
+
     group 'com.clouway'
     version '1.0-SNAPSHOT'
 
@@ -24,7 +25,6 @@ allprojects {
         mavenLocal()
         jcenter()
     }
-
 }
 
 subprojects {

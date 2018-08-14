@@ -13,6 +13,14 @@ import java.nio.charset.StandardCharsets
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 internal class PubsubRequestStreamReader : RequestStreamReader<PubsubMessageWrapper> {
+
+    /**
+     * Reads the data from an input stream
+     * and converts it to a PubsubMessageWrapper.
+     *
+     * @param requestStreamInput input stream to read
+     * @return a pubsub message wrapper
+     */
     override fun read(requestStreamInput: InputStream): PubsubMessageWrapper {
         val gson = Gson()
 
