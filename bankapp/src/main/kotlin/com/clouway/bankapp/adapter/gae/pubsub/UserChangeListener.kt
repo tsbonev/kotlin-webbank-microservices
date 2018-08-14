@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.gae.pubsub
 
+import com.clouway.bankapp.core.Operation
 import com.clouway.bankapp.core.User
 
 /**
@@ -8,4 +9,6 @@ import com.clouway.bankapp.core.User
 interface UserChangeListener {
     fun onRegistration(user: User)
     fun onLogout(username: String, email: String)
+    fun onLogin(username: String)
+    fun onTransaction(username: String, amount: Double, action: Operation)
 }

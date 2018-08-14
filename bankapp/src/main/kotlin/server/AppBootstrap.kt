@@ -8,6 +8,7 @@ import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
 import com.clouway.bankapp.core.GsonSerializer
+import com.clouway.bankapp.core.Operation
 import com.clouway.bankapp.core.User
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
@@ -46,12 +47,20 @@ class AppBootstrap : SparkApplication{
             override fun onLogout(username: String, email: String) {
                 listeners.forEach { it.onLogout(username, email) }
             }
+
+            override fun onLogin(username: String) {
+                listeners.forEach { it.onLogin(username) }
+            }
+
+            override fun onTransaction(username: String, amount: Double, action: Operation) {
+                listeners.forEach { it.onTransaction(username, amount, action) }
+            }
         }
 
         val registerController = RegisterController(userRepo, jsonSerializer, userChangeListeners)
         val listTransactionController = ListTransactionController(transactionRepo)
-        val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer)
-        val loginController = LoginController(userRepo, sessionLoader, jsonSerializer)
+        val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListeners)
+        val loginController = LoginController(userRepo, sessionLoader, jsonSerializer, listeners = userChangeListeners)
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
 

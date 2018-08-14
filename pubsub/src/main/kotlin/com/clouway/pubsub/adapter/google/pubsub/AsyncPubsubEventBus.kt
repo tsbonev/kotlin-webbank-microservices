@@ -12,6 +12,7 @@ import com.google.pubsub.v1.ProjectSubscriptionName
 import com.google.pubsub.v1.ProjectTopicName
 import com.google.pubsub.v1.PubsubMessage
 import com.google.pubsub.v1.PushConfig
+import org.eclipse.jetty.http.HttpStatus
 import spark.Route
 
 /**

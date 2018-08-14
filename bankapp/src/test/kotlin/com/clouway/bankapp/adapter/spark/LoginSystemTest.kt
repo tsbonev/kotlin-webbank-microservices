@@ -37,15 +37,16 @@ class LoginSystemTest {
     private val SID = "123"
     private val testDate = LocalDateTime.now()
 
+    private val userChangeListener = context.mock(UserChangeListener::class.java)
+
     private val loginController = LoginController(userRepo,
             sessionRepository,
             jsonTransformer,
             getExpirationDate = {testDate},
-            getCookieSID = {SID})
+            getCookieSID = {SID},
+            listeners = userChangeListener)
 
     private val userController = UserController()
-
-    private val userChangeListener = context.mock(UserChangeListener::class.java)
     private val registerController = RegisterController(userRepo, jsonTransformer, userChangeListener)
 
     private val logoutController = LogoutController(sessionRepository, userChangeListener)
@@ -117,6 +118,7 @@ class LoginSystemTest {
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
             oneOf(sessionRepository).issueSession(testSessionRequest)
+            oneOf(userChangeListener).onLogin(possibleUser.get().username)
         }
 
         loginController.handle(loginReq, res)

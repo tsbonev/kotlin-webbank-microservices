@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.spark
 
+import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.*
 import com.clouway.bankapp.core.security.SessionProvider
 import org.eclipse.jetty.http.HttpStatus
@@ -33,11 +34,12 @@ class TransactionSystemTest {
 
     private val transactionRepo = context.mock(TransactionRepository::class.java)
     private val jsonTransformer = context.mock(JsonSerializer::class.java)
+    private val userChangeListener = context.mock(UserChangeListener::class.java)
 
     private val testDate = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
 
     private val listTransactionController = ListTransactionController(transactionRepo)
-    private val saveTransactionController = SaveTransactionController(transactionRepo, jsonTransformer)
+    private val saveTransactionController = SaveTransactionController(transactionRepo, jsonTransformer, userChangeListener)
 
     private val SID = "123"
     private val testSession =
@@ -114,6 +116,9 @@ class TransactionSystemTest {
             will(returnValue(transactionRequest))
 
             oneOf(transactionRepo).save(transactionRequest)
+            oneOf(userChangeListener).onTransaction(testSession.get().username,
+                    transactionRequest.amount,
+                    transactionRequest.operation)
 
         }
 
