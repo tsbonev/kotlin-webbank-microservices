@@ -61,6 +61,7 @@ dependencies {
     appengineSdk "com.google.appengine:appengine-java-sdk:1.9.59"
     deploy project(path: ':bankapp', configuration: 'archives')
     deploy project(path: ':mailservice', configuration: 'archives')
+    deploy project(path: ':loggingservice', configuration: 'archives')
     deploy project(path: ':pubsub', configuration: 'archives')
     deploy project(path: ':entityhelper', configuration: 'archives')
 }

@@ -3,4 +3,5 @@ include 'bankapp'
 include 'mailservice'
 include 'pubsub'
 include 'entityhelper'
+include 'loggingservice'
 
