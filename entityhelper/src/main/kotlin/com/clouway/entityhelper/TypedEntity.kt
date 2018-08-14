@@ -1,4 +1,4 @@
-package com.clouway.bankapp.adapter.gae.datastore
+package com.clouway.entityhelper
 
 import com.google.appengine.api.datastore.Blob
 import com.google.appengine.api.datastore.Entity

@@ -1,4 +1,4 @@
-package com.clouway.bankapp.core
+package com.clouway.entityhelper
 
 import java.time.LocalDateTime
 import java.time.ZoneId

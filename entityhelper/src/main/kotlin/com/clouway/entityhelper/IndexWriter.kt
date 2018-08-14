@@ -1,4 +1,4 @@
-package com.clouway.bankapp.adapter.gae.datastore
+package com.clouway.entityhelper
 
 import java.util.TreeSet
 
