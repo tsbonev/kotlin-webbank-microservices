@@ -16,19 +16,25 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
                      private val sessionProvider: SessionProvider,
                      private val instant: LocalDateTime = LocalDateTime.now()) : Filter {
 
-    private fun redirectToLogin(res: Response) {
-        /*halt(HttpStatus.UNAUTHORIZED_401)
-        res.redirect("/login")*/
+    private fun redirectTo(res: Response, page: String, code: Int) {
+        halt(code)
+        res.redirect(page)
     }
 
     override fun handle(req: Request, res: Response) {
 
-        val cookie = req.cookie("SID") ?: return redirectToLogin(res)
 
         try {
+            val cookie = req.cookie("SID") ?: throw SessionNotFoundException()
             val possibleSession = sessionRepo.getSessionAvailableAt(cookie, instant)
-            if(!possibleSession.isPresent) return redirectToLogin(res)
+            if(!possibleSession.isPresent) throw SessionNotFoundException()
             sessionProvider.setContext(possibleSession.get())
+
+            when(req.pathInfo()){
+                "/login" -> return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
+                "/register" -> return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
+            }
+
         } catch (e: SessionNotFoundException) {
 
             when(req.pathInfo()){
@@ -37,7 +43,7 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
                 "/" -> return
             }
 
-            redirectToLogin(res)
+            redirectTo(res, "/login", HttpStatus.UNAUTHORIZED_401)
         }
     }
 

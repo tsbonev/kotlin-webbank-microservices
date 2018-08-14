@@ -5,4 +5,8 @@ import java.time.LocalDateTime
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-data class SessionRequest(val userId: Long, val sessionId: String, val username: String, val expiration: LocalDateTime)
+data class SessionRequest(val userId: Long,
+                          val sessionId: String,
+                          val username: String,
+                          val userEmail: String,
+                          val expiration: LocalDateTime)

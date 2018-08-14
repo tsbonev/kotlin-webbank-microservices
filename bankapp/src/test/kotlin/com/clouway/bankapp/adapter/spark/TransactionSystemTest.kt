@@ -41,7 +41,7 @@ class TransactionSystemTest {
 
     private val SID = "123"
     private val testSession =
-            Optional.of(Session(1L, SID, testDate, "John", true))
+            Optional.of(Session(1L, SID, testDate, "John", "email",true))
     private var statusReturn: Int = 0
     private val sessionProvider = context.mock(SessionProvider::class.java)
     private val transactionRequest = TransactionRequest(1L, Operation.WITHDRAW, 200.0)

@@ -1,4 +1,5 @@
 rootProject.name = 'webbank'
 include 'bankapp'
 include 'mailservice'
+include 'pubsub'
 

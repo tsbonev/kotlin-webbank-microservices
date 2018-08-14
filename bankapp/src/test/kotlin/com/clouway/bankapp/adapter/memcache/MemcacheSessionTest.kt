@@ -37,8 +37,10 @@ class MemcacheSessionTest {
     private val persistentSessionRepository = context.mock(SessionRepository::class.java)
     private val cachedSessionHandler = MemcacheSessionRepository(persistentSessionRepository, transformerWrapper)
 
-    private val session = Session(1, "123SID", yesterday, "John",true)
-    private val sessionRequest = SessionRequest(1, "123SID", "John", yesterday)
+    private val session = Session(1, "123SID", yesterday, "John",
+            "email", true)
+    private val sessionRequest = SessionRequest(1, "123SID", "John",
+            "email", yesterday)
 
 
     @Test
