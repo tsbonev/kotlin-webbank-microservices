@@ -22,7 +22,7 @@ class SessionRepositoryTest {
     private val tomorrow =  LocalDateTime.of(2018, 8, 3, 10, 36, 23, 905000000)
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
     private val yesterday =  LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
-    private val sessionRepo = DatastoreSessionRepository(instant = now, sessionRefreshDays = 1)
+    private val sessionRepo = DatastoreSessionRepository(getInstant = {now}, sessionRefreshDays = 1)
 
     private val activeSession = Session(1, "123", tomorrow, "John",
             "email", true)

@@ -6,13 +6,14 @@ import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.time.LocalDateTime
 import java.util.*
+import javax.swing.RowFilter.andFilter
 import kotlin.math.absoluteValue
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class DatastoreTransactionRepository(private val limit: Int = 100,
-                                     private val instant: LocalDateTime = LocalDateTime.now()
+                                     private val getInstant:  () -> LocalDateTime = {LocalDateTime.now()}
 ) : TransactionRepository {
 
     private fun mapEntityToTransaction(entity: Entity): Transaction{
@@ -46,16 +47,13 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         return service.get(userKey).properties["username"].toString()
     }
 
-    private fun andFilter(param: String, value: Long): Query.Filter {
-        return Query.FilterPredicate(param,
-                Query.FilterOperator.EQUAL, value)
-    }
-
     private fun getTransactionList(id: Long, pageSize: Int = limit, offset: Int = 0): List<Transaction> {
 
         val transactionEntities = service
                 .prepare(Query("Transaction")
-                        .setFilter(andFilter("userId", id)))
+                        .setFilter(Query.FilterPredicate("userId",
+                                Query.FilterOperator.EQUAL,
+                                id)))
                 .asList(withLimit(pageSize)
                         .offset(offset))
 
@@ -79,7 +77,7 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
                 transactionKey.id,
                 transactionRequest.operation,
                 transactionRequest.userId,
-                instant,
+                getInstant(),
                 transactionRequest.amount,
                 retrieveUsername(transactionRequest.userId)
         )

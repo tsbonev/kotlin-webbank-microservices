@@ -4,6 +4,7 @@ import com.clouway.bankapp.core.*
 import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.util.*
+import javax.swing.RowFilter.andFilter
 import kotlin.math.absoluteValue
 
 /**
@@ -33,14 +34,11 @@ class DatastoreUserRepository : UserRepository {
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
 
-    private fun andFilter(param: String, value: String): Query.Filter {
-        return Query.FilterPredicate(param,
-                Query.FilterOperator.EQUAL, value)
-    }
-
     private fun checkIfUserExists(username: String): Boolean {
         return service.prepare(Query("User")
-                        .setFilter(andFilter("username", username)))
+                        .setFilter(Query.FilterPredicate("username",
+                                Query.FilterOperator.EQUAL,
+                                username)))
                         .asList(withLimit(1))
                         .size != 0
     }
@@ -84,7 +82,9 @@ class DatastoreUserRepository : UserRepository {
 
         val entity = service
                 .prepare(Query("User")
-                        .setFilter(andFilter("username", username)))
+                        .setFilter(Query.FilterPredicate("username",
+                                Query.FilterOperator.EQUAL,
+                                username)))
                 .asSingleEntity() ?: return Optional.empty()
 
         return Optional.of(mapEntityToUser(entity))

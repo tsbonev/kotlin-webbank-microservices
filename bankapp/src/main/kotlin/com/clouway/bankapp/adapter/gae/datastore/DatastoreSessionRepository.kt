@@ -11,7 +11,7 @@ import java.util.*
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class DatastoreSessionRepository(private val limit: Int = 100,
-                                 private val instant: LocalDateTime = LocalDateTime.now(),
+                                 private val getInstant: () -> LocalDateTime = {LocalDateTime.now()},
                                  private val sessionRefreshDays: Long = 10
 ) : SessionRepository, SessionClearer, SessionCounter {
 
@@ -41,16 +41,12 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
 
-
-    private fun greaterThanFilter(param: String, value: Any): Query.Filter {
-        return Query.FilterPredicate(param,
-                Query.FilterOperator.GREATER_THAN, value)
-    }
-
     private fun getSessionList(date: LocalDateTime): List<Session> {
         val sessionEntities = service
                 .prepare(Query("Session")
-                        .setFilter(greaterThanFilter("expiresOn", date.toUtilDate())))
+                        .setFilter(Query.FilterPredicate("expiresOn",
+                                Query.FilterOperator.GREATER_THAN,
+                                date.toUtilDate())))
                 .asList(withLimit(limit))
 
         val sessionList = mutableListOf<Session>()
@@ -90,7 +86,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
             val refreshedSession = Session(
                     typedSession.longValue("userId"),
                     typedSession.string("sessionId"),
-                    instant.plusDays(sessionRefreshDays),
+                    getInstant().plusDays(sessionRefreshDays),
                     typedSession.string("username"),
                     typedSession.string("userEmail")
             )
@@ -134,7 +130,9 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     override fun getActiveSessionsCount(): Int {
         return service
                 .prepare(Query("Session").setKeysOnly()
-                        .setFilter(greaterThanFilter("expiresOn", instant.toUtilDate())))
+                        .setFilter(Query.FilterPredicate("expiresOn",
+                                Query.FilterOperator.GREATER_THAN,
+                                getInstant().toUtilDate())))
                 .asList(withLimit(limit)).size
     }
 }
