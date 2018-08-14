@@ -5,4 +5,5 @@ gradle/
 .gradle/
 *.iml
 *.ipr
+transaction-listener/src/main/resources/spark-bankapp-firebase-adminsdk-e1srn-c06e915c42.json
 sendgrid.env

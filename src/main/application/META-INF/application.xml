@@ -24,6 +24,13 @@
         </web>
     </module>
 
+    <module>
+        <web>
+            <web-uri>loggingservice-1.0-SNAPSHOT</web-uri>
+            <context-root>loggingservice</context-root>
+        </web>
+    </module>
+
     <library-directory>lib</library-directory>
 
 </application>

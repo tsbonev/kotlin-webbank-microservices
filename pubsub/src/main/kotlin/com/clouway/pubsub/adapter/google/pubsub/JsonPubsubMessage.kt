@@ -15,7 +15,6 @@ data class JsonPubsubMessage(val attributes: Map<String, String>, val data: Stri
     }
 
     fun getEventType(): Class<*>{
-        println(attributes["eventType"])
         return Class.forName(attributes["eventType"])
     }
 
