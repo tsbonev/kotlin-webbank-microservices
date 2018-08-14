@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.spark
 
+import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.JsonSerializer
 import com.clouway.bankapp.core.Session
 import com.clouway.bankapp.core.TransactionRepository
@@ -12,7 +13,8 @@ import spark.Response
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class SaveTransactionController(private val transactionRepo: TransactionRepository,
-                                private val transformer: JsonSerializer) : SecureController {
+                                private val transformer: JsonSerializer,
+                                private val listeners: UserChangeListener) : SecureController {
 
     override fun handle(request: Request, response: Response, currentSession: Session): Any? {
         response.type("application/json")
@@ -25,6 +27,9 @@ class SaveTransactionController(private val transactionRepo: TransactionReposito
                     transactionRequestFromJson.amount)
 
             transactionRepo.save(completeTransactionRequest)
+            listeners.onTransaction(currentSession.username,
+                    transactionRequestFromJson.amount,
+                    transactionRequestFromJson.operation)
             response.status(HttpStatus.CREATED_201)
         }catch (e: IllegalStateException){
             response.status(HttpStatus.BAD_REQUEST_400)

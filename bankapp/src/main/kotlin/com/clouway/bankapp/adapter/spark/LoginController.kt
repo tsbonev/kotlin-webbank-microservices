@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.spark
 
+import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.*
 import org.eclipse.jetty.http.HttpStatus
 import spark.Request
@@ -20,7 +21,8 @@ class LoginController(private val userRepo: UserRepository,
                       private val cookieLifetime: Int = 600000,
                       private val getCookieSID: () -> String = {
                           UUID.randomUUID().toString()
-                      }) : Controller {
+                      },
+                      private val listeners: UserChangeListener) : Controller {
 
 
     override fun handle(request: Request, response: Response): Any? {
@@ -48,7 +50,7 @@ class LoginController(private val userRepo: UserRepository,
             ))
 
             response.cookie("/", "SID", SID, cookieLifetime, false, true)
-
+            listeners.onLogin(user.username)
             response.status(HttpStatus.OK_200)
         } else {
             response.status(HttpStatus.UNAUTHORIZED_401)
