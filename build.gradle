@@ -62,6 +62,7 @@ dependencies {
     deploy project(path: ':bankapp', configuration: 'archives')
     deploy project(path: ':mailservice', configuration: 'archives')
     deploy project(path: ':pubsub', configuration: 'archives')
+    deploy project(path: ':entityhelper', configuration: 'archives')
 }
 
 appengine {

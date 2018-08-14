@@ -1,6 +1,7 @@
 package com.clouway.bankapp.adapter.gae.datastore
 
 import com.clouway.bankapp.core.*
+import com.clouway.entityhelper.TypedEntity
 import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.util.*
