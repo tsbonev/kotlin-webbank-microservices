@@ -12,6 +12,7 @@ import com.google.pubsub.v1.ProjectSubscriptionName
 import com.google.pubsub.v1.ProjectTopicName
 import com.google.pubsub.v1.PubsubMessage
 import com.google.pubsub.v1.PushConfig
+import org.eclipse.jetty.http.HttpStatus
 import spark.Route
 
 /**
@@ -29,7 +30,7 @@ internal class AsyncPubsubEventBus(private val publisherProvider: PublisherProvi
             val handler = handlers[eventType]
             val event = Gson().fromJson(messageWrapper.message.decodeData(), eventType)
             req.attribute("event", event)
-            handler!!.handle(req, res)
+            handler?.handle(req, res) ?: res.status(HttpStatus.NO_CONTENT_204)
         }
     }
 
