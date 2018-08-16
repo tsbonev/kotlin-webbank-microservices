@@ -19,7 +19,8 @@ class UserRegistrationHandler(private val mailer: Mailer) : EventHandler{
                     "Welcome to the spark bank",
                     "This was sent via a push pubsub")
         } catch (e: Exception) {
-            HttpStatus.NO_CONTENT_204
+            e.printStackTrace()
+            HttpStatus.INTERNAL_SERVER_ERROR_500
         }
     }
 }
