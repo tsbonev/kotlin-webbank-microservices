@@ -1,11 +1,7 @@
 package adapter.spark
 
-import com.clouway.mailservice.adapter.spark.UserRegistrationHandler
+import com.clouway.mailservice.adapter.spark.MailEventHandler
 import com.clouway.mailservice.core.Mailer
-import com.clouway.pubsub.core.EventBus
-import com.clouway.pubsub.core.event.Event
-import com.clouway.pubsub.core.event.EventHandler
-import com.clouway.pubsub.core.event.UserRegisteredEvent
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.returnValue
 import org.jmock.Expectations
@@ -17,13 +13,14 @@ import org.hamcrest.CoreMatchers.`is` as Is
 import org.junit.Assert.assertThat
 import spark.Request
 import spark.Response
-import spark.Route
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class MailSystemTest {
+
+    data class TestEmailEvent(val email: String)
     
     @Rule
     @JvmField
@@ -35,36 +32,15 @@ class MailSystemTest {
 
     private val mockMailer = context.mock(Mailer::class.java)
 
-    private val mailHandler = UserRegistrationHandler(mockMailer)
+    private val mailHandler = MailEventHandler("::title::", "::content::", mockMailer)
 
-    private val fakeEventBus = object: EventBus{
-        override fun publish(event: Event, eventType: Class<*>, topic: String) {
-            throw NotImplementedException()
-        }
-
-        override fun register(handlers: Map<Class<*>, EventHandler>): Route {
-            return Route { _, _ ->
-                req.attribute("event", testUserRegisteredEvent)
-                mailHandler.handle(req, res)
-            }
-        }
-
-        override fun subscribe(topic: String, subscription: String, endpoint: String) {
-            throw NotImplementedException()
-        }
-
-    }
-
-    private val testUserRegisteredEvent = UserRegisteredEvent(123, "::username::", "::email::")
-    private lateinit var attributeHolder: Event
+    private val testEmailEvent = TestEmailEvent("::email::")
 
     private val req = object: Request(){
-        override fun attribute(attribute: String, value: Any) {
-            attributeHolder = value as Event
-        }
 
         override fun <T : Any?> attribute(attribute: String?): T {
-            return attributeHolder as T
+            if(attribute == "event") return testEmailEvent as T
+            throw NotImplementedException()
         }
     }
 
@@ -73,18 +49,16 @@ class MailSystemTest {
     }
 
     @Test
-    fun eventBusShouldUseHandlerAndSendMail(){
+    fun handlerShouldSendMail(){
 
         context.expecting {
-            oneOf(mockMailer).mail(testUserRegisteredEvent.email,
-                    "Welcome to the spark bank",
-                    "This was sent via a push pubsub")
+            oneOf(mockMailer).mail(testEmailEvent.email,
+                    "::title::",
+                    "::content::")
             will(returnValue(HttpStatus.OK_200))
         }
 
-        val route = fakeEventBus.register(mapOf(UserRegisteredEvent::class.java to mailHandler))
-
-        assertThat(route.handle(req, res) as Int, Is(HttpStatus.OK_200))
+        assertThat(mailHandler.handle(req, res) as Int, Is(HttpStatus.OK_200))
     }
     
 }

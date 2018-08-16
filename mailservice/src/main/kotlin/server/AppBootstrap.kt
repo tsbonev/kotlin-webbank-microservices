@@ -1,7 +1,6 @@
 package server
 
-import com.clouway.mailservice.adapter.spark.UserLogoutHandler
-import com.clouway.mailservice.adapter.spark.UserRegistrationHandler
+import com.clouway.mailservice.adapter.spark.MailEventHandler
 import com.clouway.mailservice.core.SendGridMailer
 import com.clouway.pubsub.core.event.EventHandler
 import com.clouway.pubsub.core.event.UserLoggedOutEvent
@@ -25,8 +24,15 @@ class AppBootstrap : SparkApplication {
         val mailer = SendGridMailer()
 
         val handlerMap =  mapOf<Class<*>, EventHandler>(
-                UserLoggedOutEvent::class.java to UserLogoutHandler(mailer),
-                UserRegisteredEvent::class.java to UserRegistrationHandler(mailer)
+                UserLoggedOutEvent::class.java to MailEventHandler(
+                  "You have logged out of the spark bank",
+                        "This was sent via a push pubsub",
+                        mailer
+                ),
+                UserRegisteredEvent::class.java to MailEventHandler(
+                        "Welcome to the spark bank",
+                        "This was sent via a push pubsub",
+                        mailer)
         )
 
         eventBus.subscribe("user-change",
