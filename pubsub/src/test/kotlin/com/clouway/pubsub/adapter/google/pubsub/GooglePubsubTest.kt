@@ -27,11 +27,10 @@ import kotlin.reflect.jvm.jvmName
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-
-data class TestEvent(val data: String) : Event
-
 @Suppress("UNCHECKED_CAST")
 class GooglePubsubTest {
+
+    data class TestEvent(val data: String) : Event
 
     @Rule
     @JvmField
@@ -63,7 +62,7 @@ class GooglePubsubTest {
     private val testEventJson = """
         {"data":"::data::"}
     """.trimIndent()
-    private val converter = PubsubEventConverter()
+    private val testConverter = PubsubEventConverter()
 
     private val testPubsubMessage = createTestPubsubMessage(testEventJson)
 
@@ -87,7 +86,7 @@ class GooglePubsubTest {
 
     private val pubsubMessageWrapper = Gson().fromJson(requsestEncodedJson, PubsubMessageWrapper::class.java)
 
-    private val testRequestDecoder = PubsubRequestStreamReader()
+    private val testRequestStreamReader = PubsubRequestStreamReader()
 
     private val messageStream: InputStream = requsestEncodedJson.byteInputStream()
 
@@ -127,7 +126,7 @@ class GooglePubsubTest {
 
     @Test
     fun shouldConvertEventToPubsubMesssage() {
-        assertThat(converter.convertEvent(testEvent, TestEvent::class.java), Is(testPubsubMessage))
+        assertThat(testConverter.convertEvent(testEvent, TestEvent::class.java), Is(testPubsubMessage))
     }
 
     @Test
@@ -181,11 +180,11 @@ class GooglePubsubTest {
     }
 
     @Test
-    fun shouldDecodeRequestStream() {
+    fun shouldReadAndDecodeRequestStream() {
 
         val testEvent = TestEvent("::data::")
 
-        val decodedEvent = Gson().fromJson(testRequestDecoder
+        val decodedEvent = Gson().fromJson(testRequestStreamReader
                 .read(servletInputStream)
                 .message
                 .decodeData(), TestEvent::class.java)
