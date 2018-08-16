@@ -29,6 +29,8 @@ internal class AsyncPubsubEventBus(private val publisherProvider: PublisherProvi
             val eventType = messageWrapper.message.getEventType()
             val handler = handlers[eventType]
             val event = Gson().fromJson(messageWrapper.message.decodeData(), eventType)
+            req.attribute("eventType", eventType.name)
+            req.attribute("time", messageWrapper.message.getTime())
             req.attribute("event", event)
             handler?.handle(req, res) ?: res.status(HttpStatus.NO_CONTENT_204)
         }

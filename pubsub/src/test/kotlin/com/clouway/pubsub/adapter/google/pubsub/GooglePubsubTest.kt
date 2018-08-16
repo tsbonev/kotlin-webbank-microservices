@@ -19,6 +19,7 @@ import spark.Request
 import spark.Response
 import sun.reflect.generics.reflectiveObjects.NotImplementedException
 import java.io.InputStream
+import java.time.LocalDateTime
 import javax.servlet.ReadListener
 import javax.servlet.ServletInputStream
 import javax.servlet.http.HttpServletRequest
@@ -62,20 +63,25 @@ class GooglePubsubTest {
     private val testEventJson = """
         {"data":"::data::"}
     """.trimIndent()
-    private val testConverter = PubsubEventConverter()
+
+    private val testInstant = LocalDateTime.of(1, 1, 1, 1, 1, 1)
+    private val jsonTestInstant = Gson().toJson(testInstant)
+    private val testConverter = PubsubEventConverter(getInstant = {testInstant})
 
     private val testPubsubMessage = createTestPubsubMessage(testEventJson)
 
     private fun createTestPubsubMessage(eventJson: String): PubsubMessage {
         val data = ByteString.copyFromUtf8(eventJson)
-        return PubsubMessage.newBuilder().setData(data).putAttributes("eventType", TestEvent::class.jvmName).build()
+        return PubsubMessage.newBuilder().setData(data).putAttributes("eventType", TestEvent::class.jvmName)
+                .putAttributes("time", jsonTestInstant).build()
     }
 
     private val requsestEncodedJson = """
         {
     "message": {
     "attributes": {
-      "eventType": "${TestEvent::class.java.name}"
+      "eventType": "${TestEvent::class.java.name}",
+      "time": '$jsonTestInstant'
     },
     "data": "eyJkYXRhIjoiOjpkYXRhOjoifQ==",
     "message_id": "136969346945"
