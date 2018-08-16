@@ -67,7 +67,7 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         return transactionList
     }
 
-    override fun save(transactionRequest: TransactionRequest) {
+    override fun save(transactionRequest: TransactionRequest): Transaction {
 
         val transactionKey = KeyFactory.createKey("Transaction",
                 UUID.randomUUID()
@@ -84,6 +84,7 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         )
 
         service.put(mapTransactionToEntity(transactionKey, transaction))
+        return transaction
     }
 
     override fun getUserTransactions(id: Long, page: Int, pageSize: Int): List<Transaction> {

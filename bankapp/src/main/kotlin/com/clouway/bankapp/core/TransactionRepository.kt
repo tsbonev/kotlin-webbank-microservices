@@ -5,7 +5,7 @@ package com.clouway.bankapp.core
  */
 interface TransactionRepository {
 
-    fun save(transactionRequest: TransactionRequest)
+    fun save(transactionRequest: TransactionRequest): Transaction
 
     fun getUserTransactions(id: Long, page: Int, pageSize: Int): List<Transaction>
     fun getUserTransactions(id: Long): List<Transaction>
