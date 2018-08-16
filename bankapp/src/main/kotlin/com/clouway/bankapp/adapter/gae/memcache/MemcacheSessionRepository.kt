@@ -40,7 +40,7 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
 
     }
 
-    override fun issueSession(sessionRequest: SessionRequest) {
+    override fun issueSession(sessionRequest: SessionRequest): Session {
         val session = Session(
                 sessionRequest.userId,
                 sessionRequest.sessionId,
@@ -50,7 +50,7 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
                 true
         )
         saveSessionInCache(session)
-        origin.issueSession(sessionRequest)
+        return origin.issueSession(sessionRequest)
     }
 
     override fun terminateSession(sessionId: String) {

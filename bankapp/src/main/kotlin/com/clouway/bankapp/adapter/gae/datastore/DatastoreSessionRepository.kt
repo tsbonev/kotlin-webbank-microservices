@@ -62,10 +62,11 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         return sessionList
     }
 
-    override fun issueSession(sessionRequest: SessionRequest) {
+    override fun issueSession(sessionRequest: SessionRequest): Session {
         val sessionKey = KeyFactory.createKey("Session", sessionRequest.sessionId)
         try {
-            service.get(sessionKey)
+            val sessionEntity = service.get(sessionKey)
+            return mapEntityToSession(sessionEntity)
         } catch (e: EntityNotFoundException) {
 
             val session = Session(
@@ -78,6 +79,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
             )
 
             service.put(mapSessionToEntity(sessionKey, session))
+            return session
         }
     }
 
