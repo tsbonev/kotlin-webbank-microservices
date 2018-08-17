@@ -19,6 +19,8 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                                  private val sessionRefreshDays: Long = 10
 ) : SessionRepository, SessionClearer, SessionCounter {
 
+    private val SESSION_KIND = "Session"
+
     private fun mapEntityToSession(entity: Entity): Session{
         val typedEntity = TypedEntity(entity)
         return Session(
@@ -47,7 +49,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
 
     private fun getSessionList(date: LocalDateTime): List<Session> {
         val sessionEntities = service
-                .prepare(Query("Session")
+                .prepare(Query(SESSION_KIND)
                         .setFilter(Query.FilterPredicate("expiresOn",
                                 Query.FilterOperator.GREATER_THAN,
                                 date.toUtilDate())))
@@ -63,7 +65,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     }
 
     override fun issueSession(sessionRequest: SessionRequest): Session {
-        val sessionKey = KeyFactory.createKey("Session", sessionRequest.sessionId)
+        val sessionKey = KeyFactory.createKey(SESSION_KIND, sessionRequest.sessionId)
         try {
             val sessionEntity = service.get(sessionKey)
             return mapEntityToSession(sessionEntity)
@@ -84,7 +86,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     }
 
     private fun refreshSession(sessionId: String) {
-        val key = KeyFactory.createKey("Session", sessionId)
+        val key = KeyFactory.createKey(SESSION_KIND, sessionId)
 
         try{
             val foundSession = service.get(key)
@@ -103,7 +105,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     }
 
     override fun terminateSession(sessionId: String) {
-        val key = KeyFactory.createKey("Session", sessionId)
+        val key = KeyFactory.createKey(SESSION_KIND, sessionId)
         service.delete(key)
     }
 
@@ -111,14 +113,14 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         val sessionList = getSessionList(date)
 
         for (session in sessionList) {
-            val sessionKey = KeyFactory.createKey("Session", session.sessionId)
+            val sessionKey = KeyFactory.createKey(SESSION_KIND, session.sessionId)
             service.delete(sessionKey)
         }
     }
 
     override fun getSessionAvailableAt(sessionId: String, date: LocalDateTime): Optional<Session> {
 
-        val sessionKey = KeyFactory.createKey("Session", sessionId)
+        val sessionKey = KeyFactory.createKey(SESSION_KIND, sessionId)
 
         return try {
             val sessionEntity = service.get(sessionKey)
@@ -135,7 +137,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
 
     override fun getActiveSessionsCount(): Int {
         return service
-                .prepare(Query("Session").setKeysOnly()
+                .prepare(Query(SESSION_KIND).setKeysOnly()
                         .setFilter(Query.FilterPredicate("expiresOn",
                                 Query.FilterOperator.GREATER_THAN,
                                 getInstant().toUtilDate())))
