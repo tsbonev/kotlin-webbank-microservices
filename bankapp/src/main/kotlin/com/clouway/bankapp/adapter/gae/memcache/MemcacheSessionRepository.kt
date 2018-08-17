@@ -13,7 +13,8 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
                                 private val transformer: JsonSerializer
 ) : SessionRepository {
 
-    private fun <T> MemcacheService.getFromJson(key: String, typeOfT: Class<T>, transformer: JsonSerializer): Optional<T> {
+    private fun <T> MemcacheService.getFromJson(key: String, typeOfT: Class<T>, transformer: JsonSerializer)
+            : Optional<T> {
         val entity = this.get(key) ?: return Optional.empty()
         return Optional.of(transformer.fromJson(entity as String, typeOfT))
     }

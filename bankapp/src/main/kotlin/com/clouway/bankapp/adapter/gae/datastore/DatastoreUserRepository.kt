@@ -13,6 +13,8 @@ import kotlin.math.absoluteValue
  */
 class DatastoreUserRepository : UserRepository {
 
+    private val USER_KIND = "User"
+
     private fun mapEntityToUser(entity: Entity): User{
         val typedEntity = TypedEntity(entity)
         return User(
@@ -36,7 +38,7 @@ class DatastoreUserRepository : UserRepository {
         get() = DatastoreServiceFactory.getDatastoreService()
 
     private fun checkIfUserExists(username: String): Boolean {
-        return service.prepare(Query("User")
+        return service.prepare(Query(USER_KIND)
                         .setFilter(Query.FilterPredicate("username",
                                 Query.FilterOperator.EQUAL,
                                 username)))
@@ -59,7 +61,7 @@ class DatastoreUserRepository : UserRepository {
     }
 
     override fun getById(id: Long): Optional<User> {
-        val key = KeyFactory.createKey("User", id)
+        val key = KeyFactory.createKey(USER_KIND, id)
 
         return try {
             val userEntity = service.get(key)
@@ -70,19 +72,19 @@ class DatastoreUserRepository : UserRepository {
     }
 
     override fun deleteById(id: Long) {
-        val key = KeyFactory.createKey("User", id)
+        val key = KeyFactory.createKey(USER_KIND, id)
         service.delete(key)
     }
 
     override fun update(user: User) {
-        val key = KeyFactory.createKey("User", user.id)
+        val key = KeyFactory.createKey(USER_KIND, user.id)
         service.put(mapUserToEntity(key, user))
     }
 
     override fun getByUsername(username: String): Optional<User> {
 
         val entity = service
-                .prepare(Query("User")
+                .prepare(Query(USER_KIND)
                         .setFilter(Query.FilterPredicate("username",
                                 Query.FilterOperator.EQUAL,
                                 username)))
@@ -103,7 +105,7 @@ class DatastoreUserRepository : UserRepository {
         if (checkIfUserExists(registerRequest.username)) {
             throw UserAlreadyExistsException()
         }
-        val userKey = KeyFactory.createKey("User", user.id)
+        val userKey = KeyFactory.createKey(USER_KIND, user.id)
 
         service.put(mapUserToEntity(userKey, user))
 

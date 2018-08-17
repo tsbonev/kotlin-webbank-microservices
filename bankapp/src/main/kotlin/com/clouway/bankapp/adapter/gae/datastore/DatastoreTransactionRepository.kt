@@ -17,6 +17,9 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
                                      private val getInstant:  () -> LocalDateTime = {LocalDateTime.now()}
 ) : TransactionRepository {
 
+    private val TRANSACTION_KIND = "Transaction"
+    private val USER_KIND = "User"
+
     private fun mapEntityToTransaction(entity: Entity): Transaction{
         val typedEntity = TypedEntity(entity)
         return Transaction(
@@ -44,14 +47,14 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         get() = DatastoreServiceFactory.getDatastoreService()
 
     private fun retrieveUsername(userId: Long): String {
-        val userKey = KeyFactory.createKey("User", userId)
+        val userKey = KeyFactory.createKey(USER_KIND, userId)
         return service.get(userKey).properties["username"].toString()
     }
 
     private fun getTransactionList(id: Long, pageSize: Int = limit, offset: Int = 0): List<Transaction> {
 
         val transactionEntities = service
-                .prepare(Query("Transaction")
+                .prepare(Query(TRANSACTION_KIND)
                         .setFilter(Query.FilterPredicate("userId",
                                 Query.FilterOperator.EQUAL,
                                 id)))
@@ -69,7 +72,7 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
 
     override fun save(transactionRequest: TransactionRequest): Transaction {
 
-        val transactionKey = KeyFactory.createKey("Transaction",
+        val transactionKey = KeyFactory.createKey(TRANSACTION_KIND,
                 UUID.randomUUID()
                         .leastSignificantBits
                         .absoluteValue)
