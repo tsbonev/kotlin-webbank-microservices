@@ -5,6 +5,8 @@ import com.clouway.bankapp.core.JsonSerializer
 import com.clouway.bankapp.core.UserAlreadyExistsException
 import com.clouway.bankapp.core.UserRegistrationRequest
 import com.clouway.bankapp.core.UserRepository
+import com.clouway.bankapp.core.security.PasswordHasher
+import com.google.appengine.repackaged.org.apache.commons.codec.digest.Md5Crypt
 import org.eclipse.jetty.http.HttpStatus
 import spark.Request
 import spark.Response
@@ -13,15 +15,19 @@ import spark.Response
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class RegisterController(private val userRepo: UserRepository,
-                         private val serializer: JsonSerializer,
+                         private val transformer: JsonSerializer,
+                         private val hasher: PasswordHasher,
                          private val listeners: UserChangeListener) : Controller {
 
     override fun handle(request: Request, response: Response): Any {
         return try{
+
+            val registrationRequest = transformer.fromJson(request.body(),
+                    UserRegistrationRequest::class.java)
+            val hashedRequest = hasher.hashRequest(registrationRequest)
+
             val user = userRepo
-                    .registerIfNotExists(
-                            serializer.fromJson(request.body(),
-                                    UserRegistrationRequest::class.java))
+                    .registerIfNotExists(hashedRequest)
             listeners.onRegistration(user)
             response.status(HttpStatus.CREATED_201)
         }catch (e: UserAlreadyExistsException){

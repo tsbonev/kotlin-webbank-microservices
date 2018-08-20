@@ -7,7 +7,6 @@ import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.time.LocalDateTime
 import java.util.*
-import javax.swing.RowFilter.andFilter
 import kotlin.math.absoluteValue
 
 /**
@@ -98,3 +97,4 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         return typedEntity.raw()
     }
 }
+

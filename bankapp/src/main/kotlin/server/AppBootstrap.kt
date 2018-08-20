@@ -4,12 +4,14 @@ import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessionRepository
 import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactionRepository
 import com.clouway.bankapp.adapter.gae.datastore.DatastoreUserRepository
 import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
+import com.clouway.bankapp.adapter.gae.memcache.MemcacheUserRepository
 import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
 import com.clouway.bankapp.core.GsonSerializer
 import com.clouway.bankapp.core.Operation
 import com.clouway.bankapp.core.User
+import com.clouway.bankapp.core.security.MD5PasswordHasher
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
 import com.clouway.pubsub.factory.EventBusFactory
@@ -27,12 +29,13 @@ class AppBootstrap : SparkApplication{
 
         val jsonSerializer = GsonSerializer()
         val responseTransformer = JsonResponseTransformer(jsonSerializer)
-        val userRepo = DatastoreUserRepository()
+        val persistentUserRepo = DatastoreUserRepository()
+        val cachedUserRepo = MemcacheUserRepository(persistentUserRepo)
         val sessionRepo = DatastoreSessionRepository()
         val transactionRepo = DatastoreTransactionRepository()
         val sessionProvider = ThreadLocalSessionProvider()
 
-        val sessionLoader = MemcacheSessionRepository(sessionRepo, jsonSerializer)
+        val sessionLoader = MemcacheSessionRepository(sessionRepo)
 
         val openPaths = listOf(
                 "/login",
@@ -48,6 +51,7 @@ class AppBootstrap : SparkApplication{
                 sessionProvider,
                 openPaths = openPaths,
                 forbiddenAfterLoginPaths = forbiddenAfterLoginPaths)
+        val passwordHasher = MD5PasswordHasher()
 
         val eventPublisher = EventBusFactory.createAsyncPubsubEventBus()
         val asyncEventListener = AsyncUserChangeListener(eventPublisher)
@@ -75,10 +79,10 @@ class AppBootstrap : SparkApplication{
             }
         }
 
-        val registerController = RegisterController(userRepo, jsonSerializer, userChangeListeners)
+        val registerController = RegisterController(cachedUserRepo, jsonSerializer, passwordHasher, userChangeListeners)
         val listTransactionController = ListTransactionController(transactionRepo)
         val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListeners)
-        val loginController = LoginController(userRepo, sessionLoader, jsonSerializer, listeners = userChangeListeners)
+        val loginController = LoginController(cachedUserRepo, sessionLoader, jsonSerializer, hasher = passwordHasher, listeners = userChangeListeners)
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
 
