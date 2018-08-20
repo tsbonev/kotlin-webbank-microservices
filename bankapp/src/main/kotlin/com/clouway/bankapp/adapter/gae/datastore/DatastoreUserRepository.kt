@@ -26,20 +26,6 @@ class DatastoreUserRepository : UserRepository {
                         .size != 0
     }
 
-    override fun checkPassword(user: User): Boolean {
-
-        val possbileUser = getByUsername(user.username)
-
-        if (possbileUser.isPresent) {
-            val retrievedUser = possbileUser.get()
-
-            if (retrievedUser.password == user.password) {
-                return true
-            }
-        }
-        return false
-    }
-
     override fun getById(id: String): Optional<User> {
         val key = KeyFactory.createKey(USER_KIND, id)
 

@@ -24,19 +24,11 @@ class TransactionRepositoryTest {
     private val transactionRepo = DatastoreTransactionRepository()
     private val testId = UUID.randomUUID().toString()
     private val transactionRequest = TransactionRequest(testId, Operation.DEPOSIT, 200.0)
-    private val userJson = """
-            {
-            "id"=1,
-            "username"="John",
-            "password"="password"
-            }
-        """.trimIndent()
 
     @Before
     fun setUp() {
         val userEntity = Entity("User", testId)
         userEntity.setProperty("username", "John")
-        userEntity.setProperty("content", userJson)
         DatastoreServiceFactory.getDatastoreService().put(userEntity)
     }
 

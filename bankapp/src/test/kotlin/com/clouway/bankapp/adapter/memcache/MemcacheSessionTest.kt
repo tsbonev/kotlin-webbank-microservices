@@ -32,48 +32,70 @@ class MemcacheSessionTest {
     val context: JUnitRuleMockery = JUnitRuleMockery()
 
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
-    private val yesterday = LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
+    private val tomorrow = LocalDateTime.of(2018, 8, 3, 10, 36, 23, 905000000)
 
-    private val serializer = GsonSerializer()
-    private val persistentSessionRepository = context.mock(SessionRepository::class.java)
-    private val cachedSessionHandler = MemcacheSessionRepository(persistentSessionRepository, serializer)
+    private val mockPersistentSessionRepository = context.mock(SessionRepository::class.java)
+    private val memcacheSessionRepository = MemcacheSessionRepository(mockPersistentSessionRepository)
 
     private val testId = UUID.randomUUID().toString()
 
-    private val session = Session(testId, "123SID", yesterday, "John",
+    private val session = Session(testId, "123SID", tomorrow, "John",
             "email", true)
     private val sessionRequest = SessionRequest(testId, "123SID", "John",
-            "email", yesterday)
-
+            "email", tomorrow)
 
     @Test
-    fun saveSessionInMemcache(){
+    fun shouldSaveSessionInMemcache(){
 
         context.expecting {
-            oneOf(persistentSessionRepository).issueSession(sessionRequest)
+            oneOf(mockPersistentSessionRepository).issueSession(sessionRequest)
+            will(returnValue(session))
         }
 
-        cachedSessionHandler.issueSession(sessionRequest)
+        memcacheSessionRepository.issueSession(sessionRequest)
 
-        val retrievedSession = cachedSessionHandler.getSessionAvailableAt(session.sessionId, now)
+        val retrievedSession = memcacheSessionRepository.getSessionAvailableAt(session.sessionId, now)
         
-        assertThat(retrievedSession.get().sessionId == session.sessionId, Is(true))
+        assertThat(retrievedSession.get(), Is(session))
     }
 
     @Test
-    fun removeSessionFromMemcache(){
+    fun shouldNotReturnExpiredSession(){
+        val expiredSession = Session(testId, session.sessionId, now.minusDays(5), "John",
+                "email")
+        val expiredSessionRequest = SessionRequest(testId, session.sessionId, "John",
+                "email", now.minusDays(5))
 
         context.expecting {
-            oneOf(persistentSessionRepository).issueSession(sessionRequest)
-            oneOf(persistentSessionRepository).terminateSession(session.sessionId)
-            oneOf(persistentSessionRepository).getSessionAvailableAt(session.sessionId, now)
+            oneOf(mockPersistentSessionRepository).issueSession(expiredSessionRequest)
+            will(returnValue(expiredSession))
+
+            oneOf(mockPersistentSessionRepository).terminateSession(session.sessionId)
+        }
+
+        memcacheSessionRepository.issueSession(expiredSessionRequest)
+        val retrievedSession = memcacheSessionRepository.getSessionAvailableAt(session.sessionId, now)
+        assertThat(retrievedSession.isPresent, Is(false))
+    }
+
+    @Test
+    fun shouldRemoveSessionFromMemcache(){
+
+        context.expecting {
+            oneOf(mockPersistentSessionRepository).issueSession(sessionRequest)
+            will(returnValue(session))
+
+            oneOf(mockPersistentSessionRepository).terminateSession(session.sessionId)
+
+            oneOf(mockPersistentSessionRepository).getSessionAvailableAt(session.sessionId, now)
             will(returnValue(Optional.empty<Session>()))
         }
 
-        cachedSessionHandler.issueSession(sessionRequest)
+        memcacheSessionRepository.issueSession(sessionRequest)
 
-        cachedSessionHandler.terminateSession(session.sessionId)
+        memcacheSessionRepository.terminateSession(session.sessionId)
 
-        assertThat(cachedSessionHandler.getSessionAvailableAt(session.sessionId, now).isPresent, Is(false))
+        assertThat(memcacheSessionRepository.getSessionAvailableAt(session.sessionId, now).isPresent,
+                Is(false))
     }
 }

@@ -2,6 +2,7 @@ package com.clouway.bankapp.adapter.spark
 
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.*
+import com.clouway.bankapp.core.security.PasswordHasher
 import org.eclipse.jetty.http.HttpStatus
 import spark.Request
 import spark.Response
@@ -22,6 +23,7 @@ class LoginController(private val userRepo: UserRepository,
                       private val getCookieSID: () -> String = {
                           UUID.randomUUID().toString()
                       },
+                      private val hasher: PasswordHasher,
                       private val listeners: UserChangeListener) : Controller {
 
 
@@ -29,28 +31,28 @@ class LoginController(private val userRepo: UserRepository,
 
         val loginRequest = serializer.fromJson(request.body(), UserLoginRequest::class.java)
 
-        val actualUser = userRepo.getByUsername(loginRequest.username)
+        val possibleUser = userRepo.getByUsername(loginRequest.username)
 
         val SID = getCookieSID()
 
-        return if (actualUser.isPresent) {
+        return if (possibleUser.isPresent) {
 
-            val user = actualUser.get()
+            val retrievedUser = possibleUser.get()
 
-            if (user.password != loginRequest.password) {
+            if (!hasher.matching(loginRequest.password, retrievedUser.password)) {
                 return response.status(HttpStatus.UNAUTHORIZED_401)
             }
 
             sessionRepository.issueSession(SessionRequest(
-                    user.id,
+                    retrievedUser.id,
                     SID,
-                    user.username,
-                    user.email,
+                    retrievedUser.username,
+                    retrievedUser.email,
                     getExpirationDate()
             ))
 
             response.cookie("/", "SID", SID, cookieLifetime, false, true)
-            listeners.onLogin(user.username)
+            listeners.onLogin(retrievedUser.username)
             response.status(HttpStatus.OK_200)
         } else {
             response.status(HttpStatus.UNAUTHORIZED_401)

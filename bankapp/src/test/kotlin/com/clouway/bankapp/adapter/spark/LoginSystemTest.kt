@@ -2,6 +2,7 @@ package com.clouway.bankapp.adapter.spark
 
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.*
+import com.clouway.bankapp.core.security.PasswordHasher
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.*
 import org.jmock.Expectations
@@ -39,15 +40,18 @@ class LoginSystemTest {
 
     private val userChangeListener = context.mock(UserChangeListener::class.java)
 
+    private val mockHasher = context.mock(PasswordHasher::class.java)
+
     private val loginController = LoginController(userRepo,
             sessionRepository,
             jsonSerializer,
             getExpirationDate = {testDate},
             getCookieSID = {SID},
+            hasher = mockHasher,
             listeners = userChangeListener)
 
     private val userController = UserController()
-    private val registerController = RegisterController(userRepo, jsonSerializer, userChangeListener)
+    private val registerController = RegisterController(userRepo, jsonSerializer, mockHasher, userChangeListener)
 
     private val logoutController = LogoutController(sessionRepository, userChangeListener)
 
@@ -116,9 +120,15 @@ class LoginSystemTest {
         context.expecting {
             oneOf(jsonSerializer).fromJson(loginJSON, UserLoginRequest::class.java)
             will(returnValue(testUserLoginRequest))
+
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
+
             oneOf(sessionRepository).issueSession(testSessionRequest)
+
+            oneOf(mockHasher).matching(testUserLoginRequest.password, possibleUser.get().password)
+            will(returnValue(true))
+
             oneOf(userChangeListener).onLogin(possibleUser.get().username)
         }
 
@@ -135,8 +145,12 @@ class LoginSystemTest {
         context.expecting {
             oneOf(jsonSerializer).fromJson(loginJSON, UserLoginRequest::class.java)
             will(returnValue(testUserLoginRequest))
+
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
+
+            oneOf(mockHasher).matching(testUserLoginRequest.password, possibleUser.get().password)
+            will(returnValue(false))
         }
 
         loginController.handle(loginReq, res)
@@ -164,6 +178,10 @@ class LoginSystemTest {
         context.expecting {
             oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
+
+            oneOf(mockHasher).hashRequest(testUserRegistrationRequest)
+            will(returnValue(testUserRegistrationRequest))
+
             oneOf(userRepo)
                     .registerIfNotExists(testUserRegistrationRequest)
             will(returnValue(testUser))
@@ -182,6 +200,10 @@ class LoginSystemTest {
         context.expecting {
             oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
+
+            oneOf(mockHasher).hashRequest(testUserRegistrationRequest)
+            will(returnValue(testUserRegistrationRequest))
+
             oneOf(userRepo).registerIfNotExists(testUserRegistrationRequest)
             will(throwException(UserAlreadyExistsException()))
         }

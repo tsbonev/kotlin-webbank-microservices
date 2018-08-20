@@ -61,25 +61,7 @@ class UserRepositoryTest {
     }
 
     @Test
-    fun verifyCorrectPassword(){
-
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
-
-        assertThat(userRepo.checkPassword(userJohn), Is(true))
-    }
-
-    @Test
-    fun invalidateIncorrectPassword(){
-
-        val userJohn = User(testId, "John", "email", "incorrect password")
-
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
-
-        assertThat(userRepo.checkPassword(userJohn), Is(false))
-    }
-
-    @Test
-    fun shouldDeleteUser(){
+    fun shouldDeleteUserById(){
 
         val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
 
