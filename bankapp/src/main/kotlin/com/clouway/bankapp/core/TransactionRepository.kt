@@ -7,6 +7,6 @@ interface TransactionRepository {
 
     fun save(transactionRequest: TransactionRequest): Transaction
 
-    fun getUserTransactions(id: String, page: Int, pageSize: Int): List<Transaction>
-    fun getUserTransactions(id: String): List<Transaction>
+    fun getAccountTransactions(id: String, page: Int, pageSize: Int): List<Transaction>
+    fun getAccountTransactions(id: String): List<Transaction>
 }

@@ -3,9 +3,7 @@ package com.clouway.bankapp.adapter.gae.datastore
 import com.clouway.bankapp.core.*
 import com.clouway.entityhelper.TypedEntity
 import com.google.appengine.api.datastore.*
-import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.util.*
-import kotlin.math.absoluteValue
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
@@ -16,15 +14,6 @@ class DatastoreUserRepository : UserRepository {
 
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
-
-    private fun checkIfUserExists(username: String): Boolean {
-        return service.prepare(Query(USER_KIND)
-                        .setFilter(Query.FilterPredicate("username",
-                                Query.FilterOperator.EQUAL,
-                                username)))
-                        .asList(withLimit(1))
-                        .size != 0
-    }
 
     override fun checkPassword(user: User): Boolean {
 
@@ -73,16 +62,14 @@ class DatastoreUserRepository : UserRepository {
         return Optional.of(mapEntityToUser(entity))
     }
 
-    override fun registerIfNotExists(registerRequest: UserRegistrationRequest): User {
+    override fun register(registerRequest: UserRegistrationRequest): User {
 
-        val user = User(registerRequest.id ?: UUID.randomUUID().toString(),
+        val user = User(UUID.randomUUID().toString(),
                 registerRequest.username,
                 registerRequest.email,
-                registerRequest.password)
+                registerRequest.password,
+                emptyList())
 
-        if (checkIfUserExists(registerRequest.username)) {
-            throw UserAlreadyExistsException()
-        }
         val userKey = KeyFactory.createKey(USER_KIND, user.id)
 
         service.put(mapUserToEntity(userKey, user))
@@ -96,7 +83,8 @@ class DatastoreUserRepository : UserRepository {
                 typedEntity.string("id"),
                 typedEntity.string("username"),
                 typedEntity.string("email"),
-                typedEntity.stringOr("password", "")
+                typedEntity.stringOr("password", ""),
+                typedEntity.list("accounts")
         )
     }
 
@@ -106,6 +94,7 @@ class DatastoreUserRepository : UserRepository {
         typedEntity.setIndexedProperty("id", user.id)
         typedEntity.setIndexedProperty("username", user.username)
         typedEntity.setIndexedProperty("email", user.email)
+        typedEntity.setUnindexedProperty("accounts", user.accounts)
         return typedEntity.raw()
     }
 }

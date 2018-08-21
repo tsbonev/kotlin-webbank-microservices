@@ -7,18 +7,27 @@ import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
 import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
+import com.clouway.bankapp.command.*
 import com.clouway.bankapp.core.GsonSerializer
 import com.clouway.bankapp.core.Operation
 import com.clouway.bankapp.core.User
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
+import com.clouway.bankapp.event.UserRegisteredEvent
+import com.clouway.bankapp.event.AccountDepositEvent
+import com.clouway.bankapp.event.AccountOpenedEvent
+import com.clouway.bankapp.event.AccountWithdrawEvent
+import com.clouway.bankapp.handler.UserRegisteredEventHandler
+import com.clouway.bankapp.handler.AccountDepositEventHandler
+import com.clouway.bankapp.handler.AccountOpenedEventHandler
+import com.clouway.bankapp.handler.AccountWithdrawEventHandler
 import com.clouway.pubsub.factory.EventBusFactory
-import com.google.appengine.api.memcache.MemcacheServiceFactory
 import com.google.appengine.api.utils.SystemProperty
 import spark.Filter
 import spark.Route
 import spark.Spark.*
 import spark.kotlin.before
+import spark.kotlin.post
 import spark.servlet.SparkApplication
 
 class AppBootstrap : SparkApplication{
@@ -37,8 +46,14 @@ class AppBootstrap : SparkApplication{
         val openPaths = listOf(
                 "/login",
                 "/register",
-                "/"
+                "/",
+                "/v1/register",
+                "/_ah/admin",
+                "/_ah/admin/datastore",
+                "/_ah/admin/taskqueue",
+                "/worker/kcqrs"
         )
+
         val forbiddenAfterLoginPaths = listOf(
                 "/login",
                 "/register"
@@ -54,6 +69,7 @@ class AppBootstrap : SparkApplication{
 
         val userChangeListeners = object: UserChangeListener{
             val listeners = if(inProduction()) listOf(asyncEventListener) else emptyList()
+
             override fun onRegistration(user: User) {
                 listeners.forEach { it.onRegistration(user) }
             }
@@ -127,6 +143,42 @@ class AppBootstrap : SparkApplication{
                 responseTransformer)
 
         post("/logout", SecuredController(logoutController, sessionProvider),
+                responseTransformer)
+
+        val messageBus = CQRSContext.messageBus()
+        val eventRepository = CQRSContext.eventRepository()
+
+        messageBus.registerCommandHandler(RegisterUserCommand::class.java,
+                RegisterUserCommandHandler(messageBus, userRepo))
+        messageBus.registerEventHandler(UserRegisteredEvent::class.java,
+                UserRegisteredEventHandler(userRepo))
+
+        messageBus.registerCommandHandler(OpenAccountCommand::class.java,
+                OpenAccountCommandHandler(eventRepository))
+        messageBus.registerEventHandler(AccountOpenedEvent::class.java,
+                AccountOpenedEventHandler(userRepo))
+
+        messageBus.registerCommandHandler(MakeDepositCommand::class.java,
+                MakeDepositCommandHandler(eventRepository))
+        messageBus.registerEventHandler(AccountDepositEvent::class.java,
+                AccountDepositEventHandler(transactionRepo))
+
+        messageBus.registerCommandHandler(MakeWithdrawCommand::class.java,
+                MakeWithdrawCommandHandler(eventRepository))
+        messageBus.registerEventHandler(AccountWithdrawEvent::class.java,
+                AccountWithdrawEventHandler(transactionRepo))
+
+        post("/v1/register",
+                RegisterUserHandler(messageBus, jsonSerializer),
+                responseTransformer)
+
+        post("/v1/account/new",
+                SecuredController(OpenAccountHandler(messageBus), sessionProvider),
+                responseTransformer)
+
+        post("/v1/transactions",
+                SecuredController(MakeTransactionHandler(messageBus, userRepo, jsonSerializer),
+                        sessionProvider),
                 responseTransformer)
     }
 }

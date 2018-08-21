@@ -44,7 +44,7 @@ class TransactionSystemTest {
     private val SID = "123"
     private val testId = UUID.randomUUID().toString()
     private val testSession =
-            Optional.of(Session(testId, SID, testDate, "John", "email",true))
+            Optional.of(Session(testId, SID, testDate, "John", "email", emptyList(), true))
     private var statusReturn: Int = 0
     private val sessionProvider = context.mock(SessionProvider::class.java)
     private val transactionRequest = TransactionRequest(testId, Operation.WITHDRAW, 200.0)
@@ -86,7 +86,7 @@ class TransactionSystemTest {
         context.expecting {
             oneOf(sessionProvider).getContext()
             will(returnValue(testSession))
-            oneOf(transactionRepo).getUserTransactions(testId)
+            oneOf(transactionRepo).getAccountTransactions(testId)
             will(returnValue(emptyList<Transaction>()))
         }
 

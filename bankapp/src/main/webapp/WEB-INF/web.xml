@@ -32,4 +32,21 @@
 
     </security-constraint>
 
+    <servlet>
+        <servlet-name>kcqrsEventHandler</servlet-name>
+        <servlet-class>server.KcqrsEventHandler</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>kcqrsEventHandler</servlet-name>
+        <url-pattern>/worker/kcqrs</url-pattern>
+    </servlet-mapping>
+
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>worker</web-resource-name>
+            <url-pattern>/worker/*</url-pattern>
+        </web-resource-collection>
+    </security-constraint>
+
 </web-app>

@@ -54,6 +54,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                     sessionRequest.expiration,
                     sessionRequest.username,
                     sessionRequest.userEmail,
+                    sessionRequest.userAccounts,
                     true
             )
 
@@ -77,7 +78,6 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     }
 
     override fun getSessionAvailableAt(sessionId: String, date: LocalDateTime): Optional<Session> {
-
         val sessionKey = KeyFactory.createKey(SESSION_KIND, sessionId)
 
         return try {
@@ -116,7 +116,8 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                     session.sessionId,
                     getInstant().plusDays(sessionRefreshDays),
                     session.username,
-                    session.userEmail
+                    session.userEmail,
+                    session.userAccounts
             )
             service.put(mapSessionToEntity(key, refreshedSession))
         }catch (e: EntityNotFoundException){}
@@ -125,11 +126,12 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     private fun mapEntityToSession(entity: Entity): Session{
         val typedEntity = TypedEntity(entity)
         return Session(
-                typedEntity.string("userId"),
+                typedEntity.string("accountId"),
                 typedEntity.string("sessionId"),
                 typedEntity.dateTimeValueOrNull("expiresOn")!!,
                 typedEntity.string("username"),
                 typedEntity.string("userEmail"),
+                typedEntity.list("userAccounts"),
                 typedEntity.booleanValueOr("isAuthenticated", false)
         )
     }
@@ -138,10 +140,11 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         val typedEntity = TypedEntity(Entity(key))
         typedEntity.setIndexedDateTimeValue("expiresOn", session.expiresOn)
         typedEntity.setIndexedProperty("sessionId", session.sessionId)
-        typedEntity.setIndexedProperty("userId", session.userId)
+        typedEntity.setIndexedProperty("accountId", session.userId)
         typedEntity.setIndexedProperty("username", session.username)
         typedEntity.setIndexedProperty("userEmail", session.userEmail)
         typedEntity.setUnindexedProperty("isAuthenticated", session.isAuthenticated)
+        typedEntity.setUnindexedProperty("userAccounts", session.userAccounts)
         return typedEntity.raw()
     }
 }

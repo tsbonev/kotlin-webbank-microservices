@@ -37,6 +37,7 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
                 sessionRequest.expiration,
                 sessionRequest.username,
                 sessionRequest.userEmail,
+                sessionRequest.userAccounts,
                 true
         )
         saveSessionInCache(session)

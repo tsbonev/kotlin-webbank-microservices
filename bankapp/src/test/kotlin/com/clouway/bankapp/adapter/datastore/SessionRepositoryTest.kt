@@ -29,11 +29,11 @@ class SessionRepositoryTest {
     private val testId = UUID.randomUUID().toString()
 
     private val activeSession = Session(testId, "123", tomorrow, "John",
-            "email", true)
+            "email", listOf("::accountId::"), true)
     private val activeSessionRequest = SessionRequest(testId, "123", "John",
-            "email", tomorrow)
+            "email", listOf("::accountId::"), tomorrow)
     private val expiredSessionRequest = SessionRequest(testId, "1234", "John",
-            "email", yesterday)
+            "email", listOf("::accountId::"), yesterday)
     @Test
     fun shouldRegisterSession(){
 
@@ -100,7 +100,7 @@ class SessionRepositoryTest {
     @Test
     fun shouldNotRefreshSessionMoreThanRefreshDays(){
         sessionRepo.issueSession(SessionRequest(testId, "123", "John",
-                "email", tomorrow.plusDays(refreshDays*2)))
+                "email", listOf("::accountId::"), tomorrow.plusDays(refreshDays*2)))
         sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
         assertThat(sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
                 .get().expiresOn, Is(tomorrow.plusDays(refreshDays*2)))

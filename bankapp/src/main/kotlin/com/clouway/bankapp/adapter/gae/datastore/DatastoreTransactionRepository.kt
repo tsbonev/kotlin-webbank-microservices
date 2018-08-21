@@ -7,8 +7,6 @@ import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.time.LocalDateTime
 import java.util.*
-import javax.swing.RowFilter.andFilter
-import kotlin.math.absoluteValue
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
@@ -18,21 +16,15 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
 ) : TransactionRepository {
 
     private val TRANSACTION_KIND = "Transaction"
-    private val USER_KIND = "User"
 
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
-
-    private fun retrieveUsername(userId: String): String {
-        val userKey = KeyFactory.createKey(USER_KIND, userId)
-        return service.get(userKey).properties["username"].toString()
-    }
 
     private fun getTransactionList(id: String, pageSize: Int = limit, offset: Int = 0): List<Transaction> {
 
         val transactionEntities = service
                 .prepare(Query(TRANSACTION_KIND)
-                        .setFilter(Query.FilterPredicate("userId",
+                        .setFilter(Query.FilterPredicate("accountId",
                                 Query.FilterOperator.EQUAL,
                                 id)))
                 .asList(withLimit(pageSize)
@@ -57,21 +49,20 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         val transaction = Transaction(
                 id,
                 transactionRequest.operation,
-                transactionRequest.userId,
+                transactionRequest.accountId,
                 getInstant(),
-                transactionRequest.amount,
-                retrieveUsername(transactionRequest.userId)
+                transactionRequest.amount
         )
 
         service.put(mapTransactionToEntity(transactionKey, transaction))
         return transaction
     }
 
-    override fun getUserTransactions(id: String, page: Int, pageSize: Int): List<Transaction> {
+    override fun getAccountTransactions(id: String, page: Int, pageSize: Int): List<Transaction> {
         return getTransactionList(id, pageSize, (page - 1) * pageSize)
     }
 
-    override fun getUserTransactions(id: String): List<Transaction> {
+    override fun getAccountTransactions(id: String): List<Transaction> {
         return getTransactionList(id)
     }
 
@@ -80,20 +71,18 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         return Transaction(
                 typedEntity.string("id"),
                 Operation.valueOf(typedEntity.string("operation")),
-                typedEntity.string("userId"),
+                typedEntity.string("accountId"),
                 typedEntity.dateTimeValueOrNull("date")!!,
-                typedEntity.double("amount"),
-                retrieveUsername(typedEntity.string("userId"))
+                typedEntity.double("amount")
         )
     }
 
     private fun mapTransactionToEntity(key: Key, transaction: Transaction): Entity{
         val typedEntity = TypedEntity(Entity(key))
         typedEntity.setUnindexedDateTimeValue("date", transaction.date)
-        typedEntity.setUnindexedProperty("username", transaction.username)
         typedEntity.setUnindexedProperty("amount", transaction.amount)
         typedEntity.setIndexedProperty("operation", transaction.operation.name)
-        typedEntity.setIndexedProperty("userId", transaction.userId)
+        typedEntity.setIndexedProperty("accountId", transaction.accountId)
         typedEntity.setIndexedProperty("id", transaction.id)
         return typedEntity.raw()
     }

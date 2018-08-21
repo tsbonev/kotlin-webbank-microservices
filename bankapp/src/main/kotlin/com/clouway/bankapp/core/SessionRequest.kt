@@ -9,4 +9,5 @@ data class SessionRequest(val userId: String,
                           val sessionId: String,
                           val username: String,
                           val userEmail: String,
+                          val userAccounts: List<String>,
                           val expiration: LocalDateTime)

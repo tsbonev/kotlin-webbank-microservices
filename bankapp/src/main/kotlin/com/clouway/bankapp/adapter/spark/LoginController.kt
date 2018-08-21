@@ -46,6 +46,7 @@ class LoginController(private val userRepo: UserRepository,
                     SID,
                     user.username,
                     user.email,
+                    user.accounts,
                     getExpirationDate()
             ))
 

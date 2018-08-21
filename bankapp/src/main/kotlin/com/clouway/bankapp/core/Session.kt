@@ -10,4 +10,5 @@ data class Session(val userId: String,
                    val expiresOn: LocalDateTime,
                    val username: String,
                    val userEmail: String,
+                   val userAccounts: List<String>,
                    val isAuthenticated: Boolean = false)

@@ -15,7 +15,8 @@ class UserController : SecureController {
                 currentSession.userId,
                 currentSession.username,
                 currentSession.userEmail,
-                ""
+                "",
+                currentSession.userAccounts
         )
     }
 }
