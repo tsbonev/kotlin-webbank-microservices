@@ -22,7 +22,8 @@ class SessionRepositoryTest {
     private val tomorrow =  LocalDateTime.of(2018, 8, 3, 10, 36, 23, 905000000)
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
     private val yesterday =  LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
-    private val sessionRepo = DatastoreSessionRepository(getInstant = {now}, sessionRefreshDays = 1)
+    private val refreshDays = 10L
+    private val sessionRepo = DatastoreSessionRepository(getInstant = {now}, sessionRefreshDays = refreshDays)
 
     private val activeSession = Session(1, "123", tomorrow, "John",
             "email", true)
@@ -83,5 +84,22 @@ class SessionRepositoryTest {
         assertThat(sessionRepo.
                 getSessionAvailableAt("fakeSID", LocalDateTime.now())
                 .isPresent, Is(false))
+    }
+
+    @Test
+    fun shouldRefreshSession(){
+        sessionRepo.issueSession(activeSessionRequest)
+        sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
+        assertThat(sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
+                .get().expiresOn, Is(tomorrow.plusDays(refreshDays - 1)))
+    }
+
+    @Test
+    fun shouldNotRefreshSessionMoreThanRefreshDays(){
+        sessionRepo.issueSession(SessionRequest(1, "123", "John",
+                "email", tomorrow.plusDays(refreshDays*2)))
+        sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
+        assertThat(sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
+                .get().expiresOn, Is(tomorrow.plusDays(refreshDays*2)))
     }
 }

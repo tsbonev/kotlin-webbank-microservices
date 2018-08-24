@@ -85,18 +85,16 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         }
     }
 
-    private fun refreshSession(sessionId: String) {
-        val key = KeyFactory.createKey(SESSION_KIND, sessionId)
+    private fun refreshSession(session: Session) {
+        val key = KeyFactory.createKey(SESSION_KIND, session.sessionId)
 
         try{
-            val foundSession = service.get(key)
-            val typedSession = TypedEntity(foundSession)
             val refreshedSession = Session(
-                    typedSession.longValue("userId"),
-                    typedSession.string("sessionId"),
+                    session.userId,
+                    session.sessionId,
                     getInstant().plusDays(sessionRefreshDays),
-                    typedSession.string("username"),
-                    typedSession.string("userEmail")
+                    session.username,
+                    session.userEmail
             )
             service.put(mapSessionToEntity(key, refreshedSession))
         }catch (e: EntityNotFoundException){
@@ -128,8 +126,13 @@ class DatastoreSessionRepository(private val limit: Int = 100,
             if (typedSession.dateTimeValueOrNull("expiresOn")
                             !!.isBefore(date)) return Optional.empty()
 
-            refreshSession(sessionId)
-            Optional.of(mapEntityToSession(sessionEntity))
+            val session = mapEntityToSession(sessionEntity)
+
+            if(session.expiresOn.isBefore(getInstant().plusDays(sessionRefreshDays))){
+                refreshSession(session)
+            }
+
+            Optional.of(session)
         } catch (e: EntityNotFoundException) {
             Optional.empty()
         }
