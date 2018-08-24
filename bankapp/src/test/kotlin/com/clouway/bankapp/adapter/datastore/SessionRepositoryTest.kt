@@ -77,8 +77,8 @@ class SessionRepositoryTest {
 
         sessionRepo.issueSession(expiredSessionRequest)
         sessionRepo.issueSession(activeSessionRequest)
-        
-        assertThat(sessionRepo.getActiveSessionsCount(), Is(1))
+
+        assertThat(sessionRepo.getActiveSessionsCount(), Is(1L))
 
     }
 
