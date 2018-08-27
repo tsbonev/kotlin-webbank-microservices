@@ -7,6 +7,7 @@ import com.clouway.pubsub.core.event.UserLoggedOutEvent
 import com.clouway.pubsub.core.event.UserLoginEvent
 import com.clouway.pubsub.core.event.UserRegisteredEvent
 import com.clouway.pubsub.core.event.UserTransactionEvent
+import com.google.appengine.api.utils.SystemProperty
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)

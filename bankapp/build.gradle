@@ -24,6 +24,8 @@ dependencies {
     compile 'com.sparkjava:spark-core:2.5.4'
     compile "com.sparkjava:spark-kotlin:1.0.0-alpha"
 
+    compile 'com.google.http-client:google-http-client:1.23.0'
+
     compile "com.google.appengine:appengine-api-1.0-sdk:$appengineSdkVersion"
     compile "com.google.appengine:appengine-tools-sdk:$appengineSdkVersion"
     testCompile group: 'org.hamcrest', name: 'hamcrest-all', version: '1.3'

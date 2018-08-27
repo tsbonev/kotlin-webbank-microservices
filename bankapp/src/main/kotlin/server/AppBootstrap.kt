@@ -86,12 +86,11 @@ class AppBootstrap : SparkApplication{
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
 
-        eventBus.createTopic(userChangeTopic)
+        if(SystemProperty.environment.value() == SystemProperty.Environment.Value.Production) eventBus.createTopic(userChangeTopic)
 
         before(Filter { _, res ->
             res.raw().characterEncoding = "UTF-8"
         })
-
 
         before(securityFilter)
 
