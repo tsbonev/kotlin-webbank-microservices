@@ -5,7 +5,6 @@ import com.clouway.entityhelper.TypedEntity
 import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.util.*
-import javax.swing.RowFilter.andFilter
 import kotlin.math.absoluteValue
 
 /**
@@ -14,25 +13,6 @@ import kotlin.math.absoluteValue
 class DatastoreUserRepository : UserRepository {
 
     private val USER_KIND = "User"
-
-    private fun mapEntityToUser(entity: Entity): User{
-        val typedEntity = TypedEntity(entity)
-        return User(
-                typedEntity.longValue("id"),
-                typedEntity.string("username"),
-                typedEntity.string("email"),
-                typedEntity.stringOr("password", "")
-        )
-    }
-
-    private fun mapUserToEntity(key: Key, user: User): Entity{
-        val typedEntity = TypedEntity(Entity(key))
-        typedEntity.setUnindexedProperty("password", user.password)
-        typedEntity.setIndexedProperty("id", user.id)
-        typedEntity.setIndexedProperty("username", user.username)
-        typedEntity.setIndexedProperty("email", user.email)
-        return typedEntity.raw()
-    }
 
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
@@ -110,5 +90,24 @@ class DatastoreUserRepository : UserRepository {
         service.put(mapUserToEntity(userKey, user))
 
         return user
+    }
+
+    private fun mapEntityToUser(entity: Entity): User{
+        val typedEntity = TypedEntity(entity)
+        return User(
+                typedEntity.longValue("id"),
+                typedEntity.string("username"),
+                typedEntity.string("email"),
+                typedEntity.stringOr("password", "")
+        )
+    }
+
+    private fun mapUserToEntity(key: Key, user: User): Entity{
+        val typedEntity = TypedEntity(Entity(key))
+        typedEntity.setUnindexedProperty("password", user.password)
+        typedEntity.setIndexedProperty("id", user.id)
+        typedEntity.setIndexedProperty("username", user.username)
+        typedEntity.setIndexedProperty("email", user.email)
+        return typedEntity.raw()
     }
 }
