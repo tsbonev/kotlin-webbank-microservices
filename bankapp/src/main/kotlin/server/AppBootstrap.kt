@@ -104,12 +104,14 @@ class AppBootstrap : SparkApplication{
                 SecuredController(saveTransactionController, sessionProvider),
                 responseTransformer)
 
-        post("/login",
-                AppController(loginController),
+        post("/login", Route{
+            req, res ->
+                return@Route loginController.handle(req, res)},
                 responseTransformer)
 
-        post("/register",
-                AppController(registerController),
+        post("/register", Route{
+            req, res ->
+            return@Route registerController.handle(req, res)},
                 responseTransformer)
 
         post("/logout", SecuredController(logoutController, sessionProvider),

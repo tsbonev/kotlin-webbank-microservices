@@ -13,14 +13,14 @@ import spark.Response
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
 class SaveTransactionController(private val transactionRepo: TransactionRepository,
-                                private val transformer: JsonSerializer,
+                                private val serializer: JsonSerializer,
                                 private val listeners: UserChangeListener) : SecureController {
 
     override fun handle(request: Request, response: Response, currentSession: Session): Any? {
         response.type("application/json")
 
         return try{
-            val transactionRequestFromJson = transformer.fromJson(request.body(), TransactionRequest::class.java)
+            val transactionRequestFromJson = serializer.fromJson(request.body(), TransactionRequest::class.java)
             val completeTransactionRequest = TransactionRequest(
                     currentSession.userId,
                     transactionRequestFromJson.operation,

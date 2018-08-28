@@ -33,13 +33,13 @@ class TransactionSystemTest {
     }
 
     private val transactionRepo = context.mock(TransactionRepository::class.java)
-    private val jsonTransformer = context.mock(JsonSerializer::class.java)
+    private val jsonSerializer = context.mock(JsonSerializer::class.java)
     private val userChangeListener = context.mock(UserChangeListener::class.java)
 
     private val testDate = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
 
     private val listTransactionController = ListTransactionController(transactionRepo)
-    private val saveTransactionController = SaveTransactionController(transactionRepo, jsonTransformer, userChangeListener)
+    private val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListener)
 
     private val SID = "123"
     private val testSession =
@@ -112,7 +112,7 @@ class TransactionSystemTest {
         context.expecting {
             oneOf(sessionProvider).getContext()
             will(returnValue(testSession.get()))
-            oneOf(jsonTransformer).fromJson(transactionJson, TransactionRequest::class.java)
+            oneOf(jsonSerializer).fromJson(transactionJson, TransactionRequest::class.java)
             will(returnValue(transactionRequest))
 
             oneOf(transactionRepo).save(transactionRequest)
