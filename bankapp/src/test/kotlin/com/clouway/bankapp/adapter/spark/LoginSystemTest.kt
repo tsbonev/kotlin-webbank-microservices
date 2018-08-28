@@ -32,7 +32,7 @@ class LoginSystemTest {
 
     private val userRepo = context.mock(UserRepository::class.java)
     private val sessionRepository = context.mock(SessionRepository::class.java)
-    private val jsonTransformer = context.mock(JsonSerializer::class.java)
+    private val jsonSerializer = context.mock(JsonSerializer::class.java)
 
     private val SID = "123"
     private val testDate = LocalDateTime.now()
@@ -41,13 +41,13 @@ class LoginSystemTest {
 
     private val loginController = LoginController(userRepo,
             sessionRepository,
-            jsonTransformer,
+            jsonSerializer,
             getExpirationDate = {testDate},
             getCookieSID = {SID},
             listeners = userChangeListener)
 
     private val userController = UserController()
-    private val registerController = RegisterController(userRepo, jsonTransformer, userChangeListener)
+    private val registerController = RegisterController(userRepo, jsonSerializer, userChangeListener)
 
     private val logoutController = LogoutController(sessionRepository, userChangeListener)
 
@@ -113,7 +113,7 @@ class LoginSystemTest {
         )
 
         context.expecting {
-            oneOf(jsonTransformer).fromJson(loginJSON, UserLoginRequest::class.java)
+            oneOf(jsonSerializer).fromJson(loginJSON, UserLoginRequest::class.java)
             will(returnValue(testUserLoginRequest))
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
@@ -132,7 +132,7 @@ class LoginSystemTest {
         val possibleUser = Optional.of(user)
 
         context.expecting {
-            oneOf(jsonTransformer).fromJson(loginJSON, UserLoginRequest::class.java)
+            oneOf(jsonSerializer).fromJson(loginJSON, UserLoginRequest::class.java)
             will(returnValue(testUserLoginRequest))
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
@@ -147,7 +147,7 @@ class LoginSystemTest {
         val possibleUser = Optional.empty<User>()
 
         context.expecting {
-            oneOf(jsonTransformer).fromJson(loginJSON, UserLoginRequest::class.java)
+            oneOf(jsonSerializer).fromJson(loginJSON, UserLoginRequest::class.java)
             will(returnValue(testUserLoginRequest))
             oneOf(userRepo).getByUsername("John")
             will(returnValue(possibleUser))
@@ -161,7 +161,7 @@ class LoginSystemTest {
     fun registerUserForFirstTime(){
 
         context.expecting {
-            oneOf(jsonTransformer).fromJson(registerJSON, UserRegistrationRequest::class.java)
+            oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
             oneOf(userRepo)
                     .registerIfNotExists(testUserRegistrationRequest)
@@ -179,7 +179,7 @@ class LoginSystemTest {
     fun rejectRegisteringTakenUsername(){
 
         context.expecting {
-            oneOf(jsonTransformer).fromJson(registerJSON, UserRegistrationRequest::class.java)
+            oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
             oneOf(userRepo).registerIfNotExists(testUserRegistrationRequest)
             will(throwException(UserAlreadyExistsException()))

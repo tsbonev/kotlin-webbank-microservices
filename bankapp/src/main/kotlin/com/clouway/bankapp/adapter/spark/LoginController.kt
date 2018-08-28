@@ -13,7 +13,7 @@ import java.util.*
  */
 class LoginController(private val userRepo: UserRepository,
                       private val sessionRepository: SessionRepository,
-                      private val transformer: JsonSerializer,
+                      private val serializer: JsonSerializer,
                       private val sessionLifetime: Long = 10,
                       private val getExpirationDate: () -> LocalDateTime = {
                           LocalDateTime.now().plusDays(sessionLifetime)
@@ -27,7 +27,7 @@ class LoginController(private val userRepo: UserRepository,
 
     override fun handle(request: Request, response: Response): Any? {
 
-        val loginRequest = transformer.fromJson(request.body(), UserLoginRequest::class.java)
+        val loginRequest = serializer.fromJson(request.body(), UserLoginRequest::class.java)
 
         val actualUser = userRepo.getByUsername(loginRequest.username)
 

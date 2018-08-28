@@ -33,9 +33,9 @@ class MemcacheSessionTest {
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
     private val yesterday = LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
 
-    private val transformerWrapper = GsonSerializer()
+    private val serializer = GsonSerializer()
     private val persistentSessionRepository = context.mock(SessionRepository::class.java)
-    private val cachedSessionHandler = MemcacheSessionRepository(persistentSessionRepository, transformerWrapper)
+    private val cachedSessionHandler = MemcacheSessionRepository(persistentSessionRepository, serializer)
 
     private val session = Session(1, "123SID", yesterday, "John",
             "email", true)
