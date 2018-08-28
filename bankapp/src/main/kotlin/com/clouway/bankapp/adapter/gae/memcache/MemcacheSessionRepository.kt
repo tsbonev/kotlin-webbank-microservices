@@ -13,17 +13,6 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
                                 private val serializer: JsonSerializer
 ) : SessionRepository {
 
-    private fun <T> MemcacheService.getFromJson(key: String, typeOfT: Class<T>, serializer: JsonSerializer)
-            : Optional<T> {
-        val entity = this.get(key) ?: return Optional.empty()
-        return Optional.of(serializer.fromJson(entity as String, typeOfT))
-    }
-
-    private fun MemcacheService.putJson(key: String, obj: Any, serializer: JsonSerializer) {
-        val objToJson = serializer.toJson(obj)
-        this.put(key, objToJson)
-    }
-
     private val service: MemcacheService
         get() = MemcacheServiceFactory.getMemcacheService()
 
@@ -62,5 +51,16 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
 
     private fun saveSessionInCache(session: Session) {
         service.putJson("sid_${session.sessionId}", session, serializer)
+    }
+
+    private fun <T> MemcacheService.getFromJson(key: String, typeOfT: Class<T>, serializer: JsonSerializer)
+            : Optional<T> {
+        val entity = this.get(key) ?: return Optional.empty()
+        return Optional.of(serializer.fromJson(entity as String, typeOfT))
+    }
+
+    private fun MemcacheService.putJson(key: String, obj: Any, serializer: JsonSerializer) {
+        val objToJson = serializer.toJson(obj)
+        this.put(key, objToJson)
     }
 }

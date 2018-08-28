@@ -21,29 +21,6 @@ class DatastoreSessionRepository(private val limit: Int = 100,
 
     private val SESSION_KIND = "Session"
 
-    private fun mapEntityToSession(entity: Entity): Session{
-        val typedEntity = TypedEntity(entity)
-        return Session(
-                typedEntity.longValue("userId"),
-                typedEntity.string("sessionId"),
-                typedEntity.dateTimeValueOrNull("expiresOn")!!,
-                typedEntity.string("username"),
-                typedEntity.string("userEmail"),
-                typedEntity.booleanValueOr("isAuthenticated", false)
-        )
-    }
-
-    private fun mapSessionToEntity(key: Key, session: Session): Entity{
-        val typedEntity = TypedEntity(Entity(key))
-        typedEntity.setIndexedDateTimeValue("expiresOn", session.expiresOn)
-        typedEntity.setIndexedProperty("sessionId", session.sessionId)
-        typedEntity.setIndexedProperty("userId", session.userId)
-        typedEntity.setIndexedProperty("username", session.username)
-        typedEntity.setIndexedProperty("userEmail", session.userEmail)
-        typedEntity.setUnindexedProperty("isAuthenticated", session.isAuthenticated)
-        return typedEntity.raw()
-    }
-
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
 
@@ -145,5 +122,28 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                                 Query.FilterOperator.GREATER_THAN,
                                 getInstant().toUtilDate())))
                 .asList(withLimit(limit)).size
+    }
+
+    private fun mapEntityToSession(entity: Entity): Session{
+        val typedEntity = TypedEntity(entity)
+        return Session(
+                typedEntity.longValue("userId"),
+                typedEntity.string("sessionId"),
+                typedEntity.dateTimeValueOrNull("expiresOn")!!,
+                typedEntity.string("username"),
+                typedEntity.string("userEmail"),
+                typedEntity.booleanValueOr("isAuthenticated", false)
+        )
+    }
+
+    private fun mapSessionToEntity(key: Key, session: Session): Entity{
+        val typedEntity = TypedEntity(Entity(key))
+        typedEntity.setIndexedDateTimeValue("expiresOn", session.expiresOn)
+        typedEntity.setIndexedProperty("sessionId", session.sessionId)
+        typedEntity.setIndexedProperty("userId", session.userId)
+        typedEntity.setIndexedProperty("username", session.username)
+        typedEntity.setIndexedProperty("userEmail", session.userEmail)
+        typedEntity.setUnindexedProperty("isAuthenticated", session.isAuthenticated)
+        return typedEntity.raw()
     }
 }
