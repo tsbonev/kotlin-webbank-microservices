@@ -16,7 +16,8 @@ class SecuredController(private val controller: SecureController,
     override fun handle(request: Request, response: Response): Any? {
         return try {
             val session = sessionProvider.getContext()
-            return controller.handle(request, response, session)
+            if(!session.isPresent) throw SessionNotFoundException()
+            return controller.handle(request, response, session.get())
         } catch (e: SessionNotFoundException) {
             response.status(HttpStatus.UNAUTHORIZED_401)
         }

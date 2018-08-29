@@ -60,20 +60,20 @@ class MemcacheSessionTest {
         assertThat(retrievedSession.get().sessionId == session.sessionId, Is(true))
     }
 
-    @Test(expected = SessionNotFoundException::class)
+    @Test
     fun removeSessionFromMemcache(){
 
         context.expecting {
             oneOf(persistentSessionRepository).issueSession(sessionRequest)
             oneOf(persistentSessionRepository).terminateSession(session.sessionId)
             oneOf(persistentSessionRepository).getSessionAvailableAt(session.sessionId, now)
-            will(throwException(SessionNotFoundException()))
+            will(returnValue(Optional.empty<Session>()))
         }
 
         cachedSessionHandler.issueSession(sessionRequest)
 
         cachedSessionHandler.terminateSession(session.sessionId)
 
-        cachedSessionHandler.getSessionAvailableAt(session.sessionId, now)
+        assertThat(cachedSessionHandler.getSessionAvailableAt(session.sessionId, now).isPresent, Is(false))
     }
 }

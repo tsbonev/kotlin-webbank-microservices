@@ -10,6 +10,5 @@ interface SessionRepository {
 
     fun issueSession(sessionRequest: SessionRequest): Session
     fun terminateSession(sessionId: String)
-    @Throws(SessionNotFoundException::class)
     fun getSessionAvailableAt(sessionId: String, date: LocalDateTime): Optional<Session>
 }

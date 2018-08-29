@@ -14,6 +14,8 @@ import java.time.LocalDateTime
  */
 class SecurityFilter(private val sessionRepo: SessionRepository,
                      private val sessionProvider: SessionProvider,
+                     private val openPaths: List<String> = emptyList(),
+                     private val forbiddenAfterLoginPaths: List<String> = emptyList(),
                      private val instant: LocalDateTime = LocalDateTime.now()) : Filter {
 
     private fun redirectTo(res: Response, page: String, code: Int) {
@@ -30,18 +32,12 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
             if(!possibleSession.isPresent) throw SessionNotFoundException()
             sessionProvider.setContext(possibleSession.get())
 
-            when(req.pathInfo()){
-                "/login" -> return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
-                "/register" -> return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
-            }
+            if(forbiddenAfterLoginPaths.contains(req.pathInfo()))
+                return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
 
         } catch (e: SessionNotFoundException) {
 
-            when(req.pathInfo()){
-                "/login" -> return
-                "/register" -> return
-                "/" -> return
-            }
+            if(openPaths.contains(req.pathInfo())) return
 
             redirectTo(res, "/login", HttpStatus.UNAUTHORIZED_401)
         }

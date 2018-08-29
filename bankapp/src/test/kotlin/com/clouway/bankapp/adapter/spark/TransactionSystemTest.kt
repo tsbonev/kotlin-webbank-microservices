@@ -85,7 +85,7 @@ class TransactionSystemTest {
 
         context.expecting {
             oneOf(sessionProvider).getContext()
-            will(returnValue(testSession.get()))
+            will(returnValue(testSession))
             oneOf(transactionRepo).getUserTransactions(testId)
             will(returnValue(emptyList<Transaction>()))
         }
@@ -112,7 +112,7 @@ class TransactionSystemTest {
 
         context.expecting {
             oneOf(sessionProvider).getContext()
-            will(returnValue(testSession.get()))
+            will(returnValue(testSession))
             oneOf(jsonSerializer).fromJson(transactionJson, TransactionRequest::class.java)
             will(returnValue(transactionRequest))
 
