@@ -8,6 +8,7 @@ import org.junit.Test
 import org.junit.Assert.assertThat
 import org.junit.Rule
 import rule.DatastoreRule
+import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -21,8 +22,9 @@ class UserRepositoryTest {
 
     private val userRepo = DatastoreUserRepository()
 
-    private val registerJohn = UserRegistrationRequest("John", "email", "password")
-    private val userJohn = User(1, "John", "email", "password")
+    private val testId = UUID.randomUUID().toString()
+    private val registerJohn = UserRegistrationRequest("John", "email", "password", testId)
+    private val userJohn = User(testId, "John", "email", "password")
 
     @Test
     fun shouldRegisterUser(){
@@ -61,7 +63,7 @@ class UserRepositoryTest {
     @Test
     fun verifyCorrectPassword(){
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
 
         assertThat(userRepo.checkPassword(userJohn), Is(true))
     }
@@ -69,9 +71,9 @@ class UserRepositoryTest {
     @Test
     fun invalidateIncorrectPassword(){
 
-        val userJohn = User(1, "John", "email", "incorrect password")
+        val userJohn = User(testId, "John", "email", "incorrect password")
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
 
         assertThat(userRepo.checkPassword(userJohn), Is(false))
     }
@@ -79,7 +81,7 @@ class UserRepositoryTest {
     @Test
     fun shouldDeleteUser(){
 
-        val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
+        val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
 
         assertThat(userRepo.getById(user.id).isPresent, Is(true))
 
@@ -90,12 +92,12 @@ class UserRepositoryTest {
     @Test
     fun shouldUpdateUser(){
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password"))
+        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
 
-        val userJohn = User(1, "Don", "email", "password")
+        val userJohn = User(testId, "Don", "email", "password")
 
         userRepo.update(userJohn)
 
-        assertThat(userRepo.getById(1).get().username, Is("Don"))
+        assertThat(userRepo.getById(testId).get().username, Is("Don"))
     }
 }

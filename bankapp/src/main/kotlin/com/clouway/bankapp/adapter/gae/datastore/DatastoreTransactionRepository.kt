@@ -23,12 +23,12 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
     private val service: DatastoreService
         get() = DatastoreServiceFactory.getDatastoreService()
 
-    private fun retrieveUsername(userId: Long): String {
+    private fun retrieveUsername(userId: String): String {
         val userKey = KeyFactory.createKey(USER_KIND, userId)
         return service.get(userKey).properties["username"].toString()
     }
 
-    private fun getTransactionList(id: Long, pageSize: Int = limit, offset: Int = 0): List<Transaction> {
+    private fun getTransactionList(id: String, pageSize: Int = limit, offset: Int = 0): List<Transaction> {
 
         val transactionEntities = service
                 .prepare(Query(TRANSACTION_KIND)
@@ -49,13 +49,13 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
 
     override fun save(transactionRequest: TransactionRequest): Transaction {
 
+        val id = UUID.randomUUID().toString()
+
         val transactionKey = KeyFactory.createKey(TRANSACTION_KIND,
-                UUID.randomUUID()
-                        .leastSignificantBits
-                        .absoluteValue)
+                id)
 
         val transaction = Transaction(
-                transactionKey.id,
+                id,
                 transactionRequest.operation,
                 transactionRequest.userId,
                 getInstant(),
@@ -67,30 +67,30 @@ class DatastoreTransactionRepository(private val limit: Int = 100,
         return transaction
     }
 
-    override fun getUserTransactions(id: Long, page: Int, pageSize: Int): List<Transaction> {
+    override fun getUserTransactions(id: String, page: Int, pageSize: Int): List<Transaction> {
         return getTransactionList(id, pageSize, (page - 1) * pageSize)
     }
 
-    override fun getUserTransactions(id: Long): List<Transaction> {
+    override fun getUserTransactions(id: String): List<Transaction> {
         return getTransactionList(id)
     }
 
     private fun mapEntityToTransaction(entity: Entity): Transaction{
         val typedEntity = TypedEntity(entity)
         return Transaction(
-                typedEntity.longValue("id"),
+                typedEntity.string("id"),
                 Operation.valueOf(typedEntity.string("operation")),
-                typedEntity.longValue("userId"),
+                typedEntity.string("userId"),
                 typedEntity.dateTimeValueOrNull("date")!!,
                 typedEntity.double("amount"),
-                retrieveUsername(typedEntity.longValue("userId"))
+                retrieveUsername(typedEntity.string("userId"))
         )
     }
 
     private fun mapTransactionToEntity(key: Key, transaction: Transaction): Entity{
         val typedEntity = TypedEntity(Entity(key))
         typedEntity.setUnindexedDateTimeValue("date", transaction.date)
-        typedEntity.setUnindexedProperty("userId", transaction.username)
+        typedEntity.setUnindexedProperty("username", transaction.username)
         typedEntity.setUnindexedProperty("amount", transaction.amount)
         typedEntity.setIndexedProperty("operation", transaction.operation.name)
         typedEntity.setIndexedProperty("userId", transaction.userId)

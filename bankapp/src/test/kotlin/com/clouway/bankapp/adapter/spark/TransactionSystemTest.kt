@@ -42,11 +42,12 @@ class TransactionSystemTest {
     private val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListener)
 
     private val SID = "123"
+    private val testId = UUID.randomUUID().toString()
     private val testSession =
-            Optional.of(Session(1L, SID, testDate, "John", "email",true))
+            Optional.of(Session(testId, SID, testDate, "John", "email",true))
     private var statusReturn: Int = 0
     private val sessionProvider = context.mock(SessionProvider::class.java)
-    private val transactionRequest = TransactionRequest(1L, Operation.WITHDRAW, 200.0)
+    private val transactionRequest = TransactionRequest(testId, Operation.WITHDRAW, 200.0)
     private val transactionJson = """
         {
         "operation": "WITHDRAW",
@@ -85,7 +86,7 @@ class TransactionSystemTest {
         context.expecting {
             oneOf(sessionProvider).getContext()
             will(returnValue(testSession.get()))
-            oneOf(transactionRepo).getUserTransactions(1L)
+            oneOf(transactionRepo).getUserTransactions(testId)
             will(returnValue(emptyList<Transaction>()))
         }
 

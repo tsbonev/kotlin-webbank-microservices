@@ -127,7 +127,7 @@ class DatastoreSessionRepository(private val limit: Int = 100,
     private fun mapEntityToSession(entity: Entity): Session{
         val typedEntity = TypedEntity(entity)
         return Session(
-                typedEntity.longValue("userId"),
+                typedEntity.string("userId"),
                 typedEntity.string("sessionId"),
                 typedEntity.dateTimeValueOrNull("expiresOn")!!,
                 typedEntity.string("username"),

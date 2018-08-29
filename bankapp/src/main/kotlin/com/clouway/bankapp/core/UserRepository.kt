@@ -7,9 +7,9 @@ import java.util.*
  */
 interface UserRepository {
 
-    fun getById(id: Long): Optional<User>
+    fun getById(id: String): Optional<User>
 
-    fun deleteById(id: Long)
+    fun deleteById(id: String)
 
     fun update(user: User)
 
