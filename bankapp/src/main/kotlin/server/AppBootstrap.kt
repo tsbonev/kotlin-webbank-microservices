@@ -14,6 +14,7 @@ import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
 import com.clouway.pubsub.factory.EventBusFactory
 import com.google.appengine.api.memcache.MemcacheServiceFactory
+import com.google.appengine.api.utils.SystemProperty
 import spark.Filter
 import spark.Route
 import spark.Spark.*
@@ -33,13 +34,26 @@ class AppBootstrap : SparkApplication{
 
         val sessionLoader = MemcacheSessionRepository(sessionRepo, jsonSerializer)
 
-        val securityFilter = SecurityFilter(sessionLoader, sessionProvider)
+        val openPaths = listOf(
+                "/login",
+                "/register",
+                "/"
+        )
+        val forbiddenAfterLoginPaths = listOf(
+                "/login",
+                "/register"
+        )
+
+        val securityFilter = SecurityFilter(sessionLoader,
+                sessionProvider,
+                openPaths = openPaths,
+                forbiddenAfterLoginPaths = forbiddenAfterLoginPaths)
 
         val eventPublisher = EventBusFactory.createAsyncPubsubEventBus()
         val asyncEventListener = AsyncUserChangeListener(eventPublisher)
 
         val userChangeListeners = object: UserChangeListener{
-            val listeners = listOf(asyncEventListener)
+            val listeners = if(inProduction()) listOf(asyncEventListener) else emptyList()
             override fun onRegistration(user: User) {
                 listeners.forEach { it.onRegistration(user) }
             }
@@ -55,6 +69,10 @@ class AppBootstrap : SparkApplication{
             override fun onTransaction(username: String, amount: Double, action: Operation) {
                 listeners.forEach { it.onTransaction(username, amount, action) }
             }
+
+            private fun inProduction(): Boolean{
+                return SystemProperty.environment.value() == SystemProperty.Environment.Value.Production
+            }
         }
 
         val registerController = RegisterController(userRepo, jsonSerializer, userChangeListeners)
@@ -64,14 +82,14 @@ class AppBootstrap : SparkApplication{
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
 
-        before(Filter { req, res ->
+        before(Filter { _, res ->
             res.raw().characterEncoding = "UTF-8"
         })
 
 
         before(securityFilter)
 
-        after(Filter {req, res ->
+        after(Filter {_, res ->
             res.type("application/json")
         })
 
@@ -89,16 +107,10 @@ class AppBootstrap : SparkApplication{
                 responseTransformer)
 
         get("/active", Route{
-            req, res ->
+            _, _ ->
             return@Route sessionRepo.getActiveSessionsCount()
         }, responseTransformer)
 
-        get("/statistics"){
-            req, res ->
-            val service = MemcacheServiceFactory.getMemcacheService()
-            val stats = service.statistics
-            responseTransformer.render(stats)
-        }
 
         post("/transactions",
                 SecuredController(saveTransactionController, sessionProvider),

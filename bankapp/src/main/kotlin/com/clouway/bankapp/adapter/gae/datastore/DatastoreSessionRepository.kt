@@ -62,23 +62,6 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         }
     }
 
-    private fun refreshSession(session: Session) {
-        val key = KeyFactory.createKey(SESSION_KIND, session.sessionId)
-
-        try{
-            val refreshedSession = Session(
-                    session.userId,
-                    session.sessionId,
-                    getInstant().plusDays(sessionRefreshDays),
-                    session.username,
-                    session.userEmail
-            )
-            service.put(mapSessionToEntity(key, refreshedSession))
-        }catch (e: EntityNotFoundException){
-            throw SessionNotFoundException()
-        }
-    }
-
     override fun terminateSession(sessionId: String) {
         val key = KeyFactory.createKey(SESSION_KIND, sessionId)
         service.delete(key)
@@ -122,6 +105,21 @@ class DatastoreSessionRepository(private val limit: Int = 100,
                                 Query.FilterOperator.GREATER_THAN,
                                 getInstant().toUtilDate())))
                 .asList(withLimit(limit)).size
+    }
+
+    private fun refreshSession(session: Session) {
+        val key = KeyFactory.createKey(SESSION_KIND, session.sessionId)
+
+        try{
+            val refreshedSession = Session(
+                    session.userId,
+                    session.sessionId,
+                    getInstant().plusDays(sessionRefreshDays),
+                    session.username,
+                    session.userEmail
+            )
+            service.put(mapSessionToEntity(key, refreshedSession))
+        }catch (e: EntityNotFoundException){}
     }
 
     private fun mapEntityToSession(entity: Entity): Session{

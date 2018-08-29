@@ -23,7 +23,7 @@ class MemcacheSessionRepository(private val origin: SessionRepository,
             cachedSession
         } else {
             val persistentSession = origin.getSessionAvailableAt(sessionId, date)
-            if(!persistentSession.isPresent) throw SessionNotFoundException()
+            if(!persistentSession.isPresent) return Optional.empty()
             saveSessionInCache(persistentSession.get())
             persistentSession
         }
