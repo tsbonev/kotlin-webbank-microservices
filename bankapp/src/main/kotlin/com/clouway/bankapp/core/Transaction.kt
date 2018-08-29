@@ -5,9 +5,9 @@ import java.time.LocalDateTime
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-data class Transaction (val id: Long = -1,
+data class Transaction (val id: String,
                         val operation: Operation,
-                        val userId: Long,
+                        val userId: String,
                         val date: LocalDateTime = LocalDateTime.now(),
                         val amount: Double,
                         val username: String = "")

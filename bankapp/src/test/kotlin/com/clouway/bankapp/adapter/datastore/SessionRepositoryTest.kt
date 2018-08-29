@@ -8,6 +8,7 @@ import org.junit.Assert.assertThat
 import org.junit.Rule
 import rule.DatastoreRule
 import java.time.LocalDateTime
+import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -25,11 +26,13 @@ class SessionRepositoryTest {
     private val refreshDays = 10L
     private val sessionRepo = DatastoreSessionRepository(getInstant = {now}, sessionRefreshDays = refreshDays)
 
-    private val activeSession = Session(1, "123", tomorrow, "John",
+    private val testId = UUID.randomUUID().toString()
+
+    private val activeSession = Session(testId, "123", tomorrow, "John",
             "email", true)
-    private val activeSessionRequest = SessionRequest(1, "123", "John",
+    private val activeSessionRequest = SessionRequest(testId, "123", "John",
             "email", tomorrow)
-    private val expiredSessionRequest = SessionRequest(1, "1234", "John",
+    private val expiredSessionRequest = SessionRequest(testId, "1234", "John",
             "email", yesterday)
     @Test
     fun shouldRegisterSession(){
@@ -96,7 +99,7 @@ class SessionRepositoryTest {
 
     @Test
     fun shouldNotRefreshSessionMoreThanRefreshDays(){
-        sessionRepo.issueSession(SessionRequest(1, "123", "John",
+        sessionRepo.issueSession(SessionRequest(testId, "123", "John",
                 "email", tomorrow.plusDays(refreshDays*2)))
         sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)
         assertThat(sessionRepo.getSessionAvailableAt(activeSession.sessionId, now)

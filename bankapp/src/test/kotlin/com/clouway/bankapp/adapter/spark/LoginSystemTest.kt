@@ -66,11 +66,12 @@ class LoginSystemTest {
         }
     """.trimIndent()
 
-    private val testUser = User(1L, "John", "email", "password")
-    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password")
+    private val testId = UUID.randomUUID().toString()
+    private val testUser = User(testId, "John", "email", "password")
+    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password", testId)
     private val testUserLoginRequest = UserLoginRequest("John","password")
     private val possibleUser = Optional.of(testUser)
-    private val testSession = Session(1L, SID, testDate, "John", "email")
+    private val testSession = Session(testId, SID, testDate, "John", "email")
     private var statusReturn: Int = 0
 
     private val registerReq = object: Request(){
@@ -105,7 +106,7 @@ class LoginSystemTest {
     fun logInWithCorrectCredentials(){
 
         val testSessionRequest = SessionRequest(
-                1,
+                testId,
                 SID,
                 "John",
                 "email",
@@ -128,7 +129,7 @@ class LoginSystemTest {
 
     @Test
     fun rejectInvalidLoginCredentials(){
-        val user = User(1L, "John", "email", "wrong pass")
+        val user = User(testId, "John", "email", "wrong pass")
         val possibleUser = Optional.of(user)
 
         context.expecting {
@@ -206,7 +207,7 @@ class LoginSystemTest {
 
         val user = userController.handle(loginReq, res, testSession)
 
-        assertThat(user as User, Is(User(1L, "John", "email","")))
+        assertThat(user as User, Is(User(testId, "John", "email","")))
 
     }
 }

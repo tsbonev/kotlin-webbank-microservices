@@ -9,6 +9,7 @@ import org.junit.Test
 import org.junit.Assert.assertThat
 import org.junit.Rule
 import rule.DatastoreRule
+import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -21,7 +22,8 @@ class TransactionRepositoryTest {
     val helper: DatastoreRule = DatastoreRule()
 
     private val transactionRepo = DatastoreTransactionRepository()
-    private val transactionRequest = TransactionRequest(1, Operation.DEPOSIT, 200.0)
+    private val testId = UUID.randomUUID().toString()
+    private val transactionRequest = TransactionRequest(testId, Operation.DEPOSIT, 200.0)
     private val userJson = """
             {
             "id"=1,
@@ -32,7 +34,7 @@ class TransactionRepositoryTest {
 
     @Before
     fun setUp() {
-        val userEntity = Entity("User", 1)
+        val userEntity = Entity("User", testId)
         userEntity.setProperty("username", "John")
         userEntity.setProperty("content", userJson)
         DatastoreServiceFactory.getDatastoreService().put(userEntity)
@@ -43,13 +45,13 @@ class TransactionRepositoryTest {
 
         transactionRepo.save(transactionRequest)
 
-        assertThat(transactionRepo.getUserTransactions(1).isNotEmpty(), Is(true))
+        assertThat(transactionRepo.getUserTransactions(testId).isNotEmpty(), Is(true))
     }
 
     @Test
     fun shouldReturnEmptyTransactionList(){
 
-        assertThat(transactionRepo.getUserTransactions(1).isEmpty(), Is(true))
+        assertThat(transactionRepo.getUserTransactions(testId).isEmpty(), Is(true))
 
     }
 
@@ -58,18 +60,18 @@ class TransactionRepositoryTest {
 
         for(x in 1..10)
             transactionRepo.save(
-                    TransactionRequest(1,
+                    TransactionRequest(testId,
                             Operation.DEPOSIT,
                             200.0
                     )
             )
 
         assertThat(transactionRepo
-                .getUserTransactions(1, 1, 2)
+                .getUserTransactions(testId, 1, 2)
                 .size, Is(2))
 
         assertThat(transactionRepo
-                .getUserTransactions(1, 4, 3)
+                .getUserTransactions(testId, 4, 3)
                 .size, Is(1))
     }
 }

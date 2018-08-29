@@ -11,6 +11,7 @@ import org.junit.Rule
 import rule.MemcacheRule
 import org.jmock.AbstractExpectations.*
 import java.time.LocalDateTime
+import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -37,9 +38,11 @@ class MemcacheSessionTest {
     private val persistentSessionRepository = context.mock(SessionRepository::class.java)
     private val cachedSessionHandler = MemcacheSessionRepository(persistentSessionRepository, serializer)
 
-    private val session = Session(1, "123SID", yesterday, "John",
+    private val testId = UUID.randomUUID().toString()
+
+    private val session = Session(testId, "123SID", yesterday, "John",
             "email", true)
-    private val sessionRequest = SessionRequest(1, "123SID", "John",
+    private val sessionRequest = SessionRequest(testId, "123SID", "John",
             "email", yesterday)
 
 

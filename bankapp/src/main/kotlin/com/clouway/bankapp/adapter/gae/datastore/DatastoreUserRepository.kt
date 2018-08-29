@@ -40,7 +40,7 @@ class DatastoreUserRepository : UserRepository {
         return false
     }
 
-    override fun getById(id: Long): Optional<User> {
+    override fun getById(id: String): Optional<User> {
         val key = KeyFactory.createKey(USER_KIND, id)
 
         return try {
@@ -51,7 +51,7 @@ class DatastoreUserRepository : UserRepository {
         }
     }
 
-    override fun deleteById(id: Long) {
+    override fun deleteById(id: String) {
         val key = KeyFactory.createKey(USER_KIND, id)
         service.delete(key)
     }
@@ -75,9 +75,7 @@ class DatastoreUserRepository : UserRepository {
 
     override fun registerIfNotExists(registerRequest: UserRegistrationRequest): User {
 
-        val user = User(UUID.randomUUID()
-                .leastSignificantBits
-                    .absoluteValue,
+        val user = User(registerRequest.id ?: UUID.randomUUID().toString(),
                 registerRequest.username,
                 registerRequest.email,
                 registerRequest.password)
@@ -95,7 +93,7 @@ class DatastoreUserRepository : UserRepository {
     private fun mapEntityToUser(entity: Entity): User{
         val typedEntity = TypedEntity(entity)
         return User(
-                typedEntity.longValue("id"),
+                typedEntity.string("id"),
                 typedEntity.string("username"),
                 typedEntity.string("email"),
                 typedEntity.stringOr("password", "")

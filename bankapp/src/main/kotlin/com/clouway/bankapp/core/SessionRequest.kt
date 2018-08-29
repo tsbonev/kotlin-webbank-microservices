@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-data class SessionRequest(val userId: Long,
+data class SessionRequest(val userId: String,
                           val sessionId: String,
                           val username: String,
                           val userEmail: String,
