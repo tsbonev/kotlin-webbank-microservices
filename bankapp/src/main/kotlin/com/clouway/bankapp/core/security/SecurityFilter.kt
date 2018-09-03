@@ -1,6 +1,5 @@
 package com.clouway.bankapp.core.security
 
-import com.clouway.bankapp.core.SessionNotFoundException
 import com.clouway.bankapp.core.SessionRepository
 import org.eclipse.jetty.http.HttpStatus
 import spark.Filter
@@ -18,29 +17,26 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
                      private val forbiddenAfterLoginPaths: List<String> = emptyList(),
                      private val instant: LocalDateTime = LocalDateTime.now()) : Filter {
 
-    private fun redirectTo(res: Response, page: String, code: Int) {
-        halt(code)
-        res.redirect(page)
-    }
-
     override fun handle(req: Request, res: Response) {
 
+        val cookie = req.cookie("SID")
+                ?: return redirectTo(req, res, "/register")
 
-        try {
-            val cookie = req.cookie("SID") ?: throw SessionNotFoundException()
-            val possibleSession = sessionRepo.getSessionAvailableAt(cookie, instant)
-            if(!possibleSession.isPresent) throw SessionNotFoundException()
-            sessionProvider.setContext(possibleSession.get())
+        val possibleSession = sessionRepo.getSessionAvailableAt(cookie, instant)
 
-            if(forbiddenAfterLoginPaths.contains(req.pathInfo()))
-                return redirectTo(res, "/user", HttpStatus.FORBIDDEN_403)
+        if (!possibleSession.isPresent) return redirectTo(req, res, "/login")
 
-        } catch (e: SessionNotFoundException) {
+        sessionProvider.setContext(possibleSession.get())
 
-            if(openPaths.contains(req.pathInfo())) return
-
-            redirectTo(res, "/login", HttpStatus.UNAUTHORIZED_401)
+        if (forbiddenAfterLoginPaths.contains(req.pathInfo())) {
+            halt(HttpStatus.FORBIDDEN_403)
+            res.redirect("/user")
         }
     }
 
+    private fun redirectTo(req: Request, res: Response, page: String) {
+        if (openPaths.contains(req.pathInfo())) return
+        halt(HttpStatus.UNAUTHORIZED_401)
+        res.redirect(page)
+    }
 }
