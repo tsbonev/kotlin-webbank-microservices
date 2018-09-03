@@ -1,5 +1,6 @@
 package com.clouway.bankapp.adapter.spark
 
+import com.clouway.bankapp.adapter.gae.pubsub.TransactionListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.*
 import com.clouway.bankapp.core.security.SessionProvider
@@ -34,12 +35,14 @@ class TransactionSystemTest {
 
     private val transactionRepo = context.mock(Transactions::class.java)
     private val jsonSerializer = context.mock(JsonSerializer::class.java)
-    private val userChangeListener = context.mock(UserChangeListener::class.java)
+    private val transactionListener = context.mock(TransactionListener::class.java)
 
     private val testDate = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
 
     private val listTransactionController = ListTransactionController(transactionRepo)
-    private val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListener)
+    private val saveTransactionController = SaveTransactionController(transactionRepo,
+            jsonSerializer,
+            transactionListener)
 
     private val SID = "123"
     private val testId = UUID.randomUUID().toString()
@@ -117,9 +120,9 @@ class TransactionSystemTest {
             will(returnValue(transactionRequest))
 
             oneOf(transactionRepo).save(transactionRequest)
-            oneOf(userChangeListener).onTransaction(testSession.get().username,
-                    transactionRequest.amount,
-                    transactionRequest.operation)
+            oneOf(transactionListener).onWithdraw(testSession.get().userId,
+                    transactionRequest.amount
+                    )
 
         }
 
