@@ -51,6 +51,7 @@ dependencies {
     deploy project(path: ':loggingservice', configuration: 'archives')
     deploy project(path: ':pubsub', configuration: 'archives')
     deploy project(path: ':entityhelper', configuration: 'archives')
+    deploy project(path: ':transaction-listener', configuration: 'archives')
 }
 
 appengine {

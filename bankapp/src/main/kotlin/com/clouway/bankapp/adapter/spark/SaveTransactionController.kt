@@ -1,10 +1,7 @@
 package com.clouway.bankapp.adapter.spark
 
-import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
-import com.clouway.bankapp.core.JsonSerializer
-import com.clouway.bankapp.core.Session
-import com.clouway.bankapp.core.Transactions
-import com.clouway.bankapp.core.TransactionRequest
+import com.clouway.bankapp.adapter.gae.pubsub.TransactionListener
+import com.clouway.bankapp.core.*
 import org.eclipse.jetty.http.HttpStatus
 import spark.Request
 import spark.Response
@@ -14,7 +11,7 @@ import spark.Response
  */
 class SaveTransactionController(private val transactionRepo: Transactions,
                                 private val serializer: JsonSerializer,
-                                private val listeners: UserChangeListener) : SecureController {
+                                private val listeners: TransactionListener) : SecureController {
 
     override fun handle(request: Request, response: Response, currentSession: Session): Any? {
         response.type("application/json")
@@ -27,9 +24,14 @@ class SaveTransactionController(private val transactionRepo: Transactions,
                     transactionRequestFromJson.amount)
 
             transactionRepo.save(completeTransactionRequest)
-            listeners.onTransaction(currentSession.username,
-                    transactionRequestFromJson.amount,
-                    transactionRequestFromJson.operation)
+
+            when(transactionRequestFromJson.operation){
+                Operation.DEPOSIT -> listeners.onDeposit(currentSession.userId,
+                        transactionRequestFromJson.amount)
+                Operation.WITHDRAW -> listeners.onWithdraw(currentSession.userId,
+                        transactionRequestFromJson.amount)
+            }
+
             response.status(HttpStatus.CREATED_201)
         }catch (e: IllegalStateException){
             response.status(HttpStatus.BAD_REQUEST_400)
