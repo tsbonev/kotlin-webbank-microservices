@@ -1,0 +1,7 @@
+dependencies {
+    compile 'com.google.cloud:google-cloud-pubsub:1.35.0'
+    compile "com.google.appengine:appengine-api-1.0-sdk:$appengineSdkVersion"
+    compile "com.google.appengine:appengine-tools-sdk:$appengineSdkVersion"
+    testCompile "com.google.appengine:appengine-api-stubs:$appengineSdkVersion",
+            "com.google.appengine:appengine-testing:$appengineSdkVersion"
+}

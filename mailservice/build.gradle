@@ -1,6 +1,30 @@
 apply plugin: 'war'
+apply plugin: 'appengine'
+
+buildscript {
+    repositories {
+        mavenCentral()
+        mavenLocal()
+        jcenter()
+    }
+
+    dependencies {
+        classpath "com.google.appengine:gradle-appengine-plugin:$appenginePluginVersion"
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.60"
+    }
+}
+
 
 dependencies {
+    appengineSdk "com.google.appengine:appengine-java-sdk:$appengineSdkVersion"
     compile project (':pubsub')
     compile 'com.sendgrid:sendgrid-java:4.0.1'
+    compile "com.google.appengine:appengine-api-1.0-sdk:$appengineSdkVersion"
+    compile "com.google.appengine:appengine-tools-sdk:$appengineSdkVersion"
+    testCompile "com.google.appengine:appengine-api-stubs:$appengineSdkVersion",
+            "com.google.appengine:appengine-testing:$appengineSdkVersion"
+}
+
+appengine {
+    downloadSdk = true
 }

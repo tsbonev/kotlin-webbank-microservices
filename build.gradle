@@ -3,6 +3,10 @@ apply plugin: 'ear'
 apply plugin: 'appengine'
 
 buildscript {
+
+    ext.appenginePluginVersion = "1.9.59"
+    ext.appengineSdkVersion = "1.9.64"
+
     repositories {
         mavenCentral()
         mavenLocal()
@@ -10,7 +14,7 @@ buildscript {
     }
 
     dependencies {
-        classpath "com.google.appengine:gradle-appengine-plugin:1.9.59"
+        classpath "com.google.appengine:gradle-appengine-plugin:$appenginePluginVersion"
         classpath 'org.jetbrains.kotlin:kotlin-gradle-plugin:1.2.60'
     }
 }
@@ -32,14 +36,7 @@ subprojects {
     apply plugin: 'kotlin'
 
     dependencies {
-        compile 'com.google.cloud:google-cloud-pubsub:1.35.0'
-
         compile 'javax.servlet:javax.servlet-api:3.1.0'
-
-        compile "com.google.appengine:appengine-api-1.0-sdk:1.9.59"
-        compile "com.google.appengine:appengine-tools-sdk:1.9.59"
-
-        compile 'com.google.guava:guava:19.0'
 
         compile 'com.sparkjava:spark-core:2.5.4'
         compile "com.sparkjava:spark-kotlin:1.0.0-alpha"
@@ -52,13 +49,12 @@ subprojects {
         testCompile group: 'org.jmock', name: 'jmock-junit4', version: '2.8.4'
         testCompile "org.jetbrains.kotlin:kotlin-test:1.2.51"
         testCompile "org.jetbrains.kotlin:kotlin-test-junit:1.2.51"
-        testCompile "com.google.appengine:appengine-api-stubs:1.9.59", "com.google.appengine:appengine-testing:1.9.59"
     }
 }
 
 
 dependencies {
-    appengineSdk "com.google.appengine:appengine-java-sdk:1.9.59"
+    appengineSdk "com.google.appengine:appengine-java-sdk:$appengineSdkVersion"
     deploy project(path: ':bankapp', configuration: 'archives')
     deploy project(path: ':mailservice', configuration: 'archives')
     deploy project(path: ':loggingservice', configuration: 'archives')
