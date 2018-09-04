@@ -18,7 +18,11 @@ buildscript {
 dependencies {
     appengineSdk "com.google.appengine:appengine-java-sdk:$appengineSdkVersion"
     compile project (':pubsub')
+
     compile 'com.sendgrid:sendgrid-java:4.0.1'
+    compile ('com.google.appengine.tools:appengine-gcs-client:0.8')  {
+        exclude group: 'com.google.guava'
+    }
     compile "com.google.appengine:appengine-api-1.0-sdk:$appengineSdkVersion"
     compile "com.google.appengine:appengine-tools-sdk:$appengineSdkVersion"
     testCompile "com.google.appengine:appengine-api-stubs:$appengineSdkVersion",

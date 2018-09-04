@@ -7,14 +7,14 @@ import java.io.IOException
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class SendGridMailer : Mailer {
+class SendGridMailer(private val apikey: String) : Mailer {
     override fun mail(receiver: String, title: String, content: String): Int {
         val from = Email("admin@sacred-union.com")
         val to = Email(receiver)
         val mailContent = Content("text/plain", content)
         val mail = Mail(from, title, to, mailContent)
 
-        val sg = SendGrid(System.getProperty("sendgrid_api_key"))
+        val sg = SendGrid(apikey)
         val request = Request()
         return try {
             request.method = Method.POST

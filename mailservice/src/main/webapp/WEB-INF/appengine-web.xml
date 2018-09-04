@@ -14,7 +14,6 @@
     </automatic-scaling>
 
     <system-properties>
-        <property name="sendgrid_api_key" value="api-key"/>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
     </system-properties>
 
