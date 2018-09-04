@@ -98,13 +98,13 @@ class DatastoreSessionRepository(private val limit: Int = 100,
         }
     }
 
-    override fun getActiveSessionsCount(): Int {
+    override fun getActiveSessionsCount(): Long {
         return service
                 .prepare(Query(SESSION_KIND).setKeysOnly()
                         .setFilter(Query.FilterPredicate("expiresOn",
                                 Query.FilterOperator.GREATER_THAN,
                                 getInstant().toUtilDate())))
-                .asList(withLimit(limit)).size
+                .asList(withLimit(limit)).size.toLong()
     }
 
     private fun refreshSession(session: Session) {
