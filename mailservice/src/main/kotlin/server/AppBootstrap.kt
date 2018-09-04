@@ -6,9 +6,14 @@ import com.clouway.pubsub.core.event.EventHandler
 import com.clouway.pubsub.core.event.UserLoggedOutEvent
 import com.clouway.pubsub.core.event.UserRegisteredEvent
 import com.clouway.pubsub.factory.EventBusFactory
+import com.google.appengine.repackaged.com.google.common.io.CharStreams
+import com.google.appengine.tools.cloudstorage.GcsFilename
+import com.google.appengine.tools.cloudstorage.GcsServiceFactory
 import com.google.cloud.ServiceOptions
 import spark.Spark.post
 import spark.servlet.SparkApplication
+import java.io.InputStreamReader
+import java.nio.channels.Channels
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
@@ -21,7 +26,18 @@ class AppBootstrap : SparkApplication {
         val pushUrl = "/_ah/push-handlers/pubsub/mail"
 
         val eventBus = EventBusFactory.createAsyncPubsubEventBus()
-        val mailer = SendGridMailer()
+
+        val apiKeyFile = GcsFilename("sacred-union-210613.appspot.com",
+                "sendgrid.env")
+
+        val gscReadChannel = GcsServiceFactory
+                .createGcsService()
+                .openPrefetchingReadChannel(apiKeyFile, 0, DEFAULT_BUFFER_SIZE)
+
+        val sendgridApiKey = CharStreams.toString(InputStreamReader(
+                Channels.newInputStream(gscReadChannel), Charsets.UTF_8))
+
+        val mailer = SendGridMailer(sendgridApiKey.trim())
 
         val handlerMap =  mapOf<Class<*>, EventHandler>(
                 UserLoggedOutEvent::class.java to MailEventHandler(

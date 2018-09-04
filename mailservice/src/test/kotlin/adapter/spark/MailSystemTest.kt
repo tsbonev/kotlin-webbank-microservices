@@ -2,6 +2,7 @@ package adapter.spark
 
 import com.clouway.mailservice.adapter.spark.MailEventHandler
 import com.clouway.mailservice.core.Mailer
+import com.clouway.mailservice.core.SendGridMailer
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.returnValue
 import org.jmock.Expectations
@@ -60,5 +61,5 @@ class MailSystemTest {
 
         assertThat(mailHandler.handle(req, res) as Int, Is(HttpStatus.OK_200))
     }
-    
+
 }
