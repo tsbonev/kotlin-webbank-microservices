@@ -28,15 +28,18 @@ class SecurityFilter(private val sessionRepo: SessionRepository,
 
         sessionProvider.setContext(possibleSession.get())
 
-        if (forbiddenAfterLoginPaths.contains(req.pathInfo())) {
+        if (forbiddenAfterLoginPaths.contains(req.pathInfo())){
             halt(HttpStatus.FORBIDDEN_403)
             res.redirect("/user")
         }
+
     }
+
 
     private fun redirectTo(req: Request, res: Response, page: String) {
         if (openPaths.contains(req.pathInfo())) return
         halt(HttpStatus.UNAUTHORIZED_401)
         res.redirect(page)
     }
+
 }

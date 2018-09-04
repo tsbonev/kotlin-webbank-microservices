@@ -24,19 +24,11 @@ class TransactionRepositoryTest {
     private val transactionRepo = DatastoreTransactionRepository()
     private val testId = UUID.randomUUID().toString()
     private val transactionRequest = TransactionRequest(testId, Operation.DEPOSIT, 200.0)
-    private val userJson = """
-            {
-            "id"=1,
-            "username"="John",
-            "password"="password"
-            }
-        """.trimIndent()
 
     @Before
     fun setUp() {
         val userEntity = Entity("User", testId)
         userEntity.setProperty("username", "John")
-        userEntity.setProperty("content", userJson)
         DatastoreServiceFactory.getDatastoreService().put(userEntity)
     }
 
@@ -45,13 +37,13 @@ class TransactionRepositoryTest {
 
         transactionRepo.save(transactionRequest)
 
-        assertThat(transactionRepo.getUserTransactions(testId).isNotEmpty(), Is(true))
+        assertThat(transactionRepo.getAccountTransactions(testId).isNotEmpty(), Is(true))
     }
 
     @Test
     fun shouldReturnEmptyTransactionList(){
 
-        assertThat(transactionRepo.getUserTransactions(testId).isEmpty(), Is(true))
+        assertThat(transactionRepo.getAccountTransactions(testId).isEmpty(), Is(true))
 
     }
 
@@ -67,11 +59,11 @@ class TransactionRepositoryTest {
             )
 
         assertThat(transactionRepo
-                .getUserTransactions(testId, 1, 2)
+                .getAccountTransactions(testId, 1, 2)
                 .size, Is(2))
 
         assertThat(transactionRepo
-                .getUserTransactions(testId, 4, 3)
+                .getAccountTransactions(testId, 4, 3)
                 .size, Is(1))
     }
 }

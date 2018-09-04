@@ -15,8 +15,7 @@ interface UserRepository {
 
     fun getByUsername(username: String): Optional<User>
 
-    @Throws(UserAlreadyExistsException::class)
-    fun registerIfNotExists(registerRequest: UserRegistrationRequest) : User
+    fun register(registerRequest: UserRegistrationRequest) : User
 
     fun checkPassword(user: User): Boolean
 }

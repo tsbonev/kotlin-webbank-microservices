@@ -7,8 +7,7 @@ import java.time.LocalDateTime
  */
 data class Transaction (val id: String,
                         val operation: Operation,
-                        val userId: String,
-                        val date: LocalDateTime = LocalDateTime.now(),
-                        val amount: Double,
-                        val username: String = "")
+                        val accountId: String,
+                        val date: LocalDateTime,
+                        val amount: Double)
 

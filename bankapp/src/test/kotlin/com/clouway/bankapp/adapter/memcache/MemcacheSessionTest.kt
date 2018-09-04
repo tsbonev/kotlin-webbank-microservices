@@ -41,9 +41,9 @@ class MemcacheSessionTest {
     private val testId = UUID.randomUUID().toString()
 
     private val session = Session(testId, "123SID", yesterday, "John",
-            "email", true)
+            "email", listOf("::accountId::"), true)
     private val sessionRequest = SessionRequest(testId, "123SID", "John",
-            "email", yesterday)
+            "email", listOf("::accountId::"), yesterday)
 
 
     @Test

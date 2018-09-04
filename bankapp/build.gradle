@@ -32,6 +32,10 @@ dependencies {
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:1.2.51"
     testCompile "com.google.appengine:appengine-api-stubs:$appengineSdkVersion",
             "com.google.appengine:appengine-testing:$appengineSdkVersion"
+
+    compile "com.clouway.kcqrs:kcqrs-core:0.0.1"
+    compile "com.clouway.kcqrs:kcqrs-testing:0.0.1"
+    compile "com.clouway.kcqrs.adapters:kcqrs-appengine:0.0.1"
 }
 
 appengine {

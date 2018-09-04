@@ -67,11 +67,11 @@ class LoginSystemTest {
     """.trimIndent()
 
     private val testId = UUID.randomUUID().toString()
-    private val testUser = User(testId, "John", "email", "password")
-    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password", testId)
+    private val testUser = User(testId, "John", "email", "password", emptyList())
+    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password")
     private val testUserLoginRequest = UserLoginRequest("John","password")
     private val possibleUser = Optional.of(testUser)
-    private val testSession = Session(testId, SID, testDate, "John", "email")
+    private val testSession = Session(testId, SID, testDate, "John", "email", emptyList())
     private var statusReturn: Int = 0
 
     private val registerReq = object: Request(){
@@ -110,6 +110,7 @@ class LoginSystemTest {
                 SID,
                 "John",
                 "email",
+                emptyList(),
                 testDate
         )
 
@@ -129,7 +130,7 @@ class LoginSystemTest {
 
     @Test
     fun rejectInvalidLoginCredentials(){
-        val user = User(testId, "John", "email", "wrong pass")
+        val user = User(testId, "John", "email", "wrong pass", emptyList())
         val possibleUser = Optional.of(user)
 
         context.expecting {
@@ -159,13 +160,17 @@ class LoginSystemTest {
     }
 
     @Test
-    fun registerUserForFirstTime(){
+    fun registerUser(){
 
         context.expecting {
             oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
+
+            oneOf(userRepo).getByUsername(testUserRegistrationRequest.username)
+            will(returnValue(Optional.empty<User>()))
+
             oneOf(userRepo)
-                    .registerIfNotExists(testUserRegistrationRequest)
+                    .register(testUserRegistrationRequest)
             will(returnValue(testUser))
             oneOf(userChangeListener).onRegistration(testUser)
         }
@@ -182,8 +187,8 @@ class LoginSystemTest {
         context.expecting {
             oneOf(jsonSerializer).fromJson(registerJSON, UserRegistrationRequest::class.java)
             will(returnValue(testUserRegistrationRequest))
-            oneOf(userRepo).registerIfNotExists(testUserRegistrationRequest)
-            will(throwException(UserAlreadyExistsException()))
+            oneOf(userRepo).getByUsername(testUserRegistrationRequest.username)
+            will(returnValue(Optional.of(testUser)))
         }
 
         registerController.handle(registerReq, res)
@@ -207,7 +212,7 @@ class LoginSystemTest {
 
         val user = userController.handle(loginReq, res, testSession)
 
-        assertThat(user as User, Is(User(testId, "John", "email","")))
+        assertThat(user as User, Is(User(testId, "John", "email","", emptyList())))
 
     }
 }

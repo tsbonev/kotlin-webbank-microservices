@@ -18,10 +18,14 @@ class RegisterController(private val userRepo: UserRepository,
 
     override fun handle(request: Request, response: Response): Any {
         return try{
-            val user = userRepo
-                    .registerIfNotExists(
-                            serializer.fromJson(request.body(),
-                                    UserRegistrationRequest::class.java))
+
+            val registerRequest = serializer.fromJson(request.body(),
+                    UserRegistrationRequest::class.java)
+
+            if(userRepo.getByUsername(registerRequest.username).isPresent) throw UserAlreadyExistsException()
+
+            val user = userRepo.register(registerRequest)
+
             listeners.onRegistration(user)
             response.status(HttpStatus.CREATED_201)
         }catch (e: UserAlreadyExistsException){
