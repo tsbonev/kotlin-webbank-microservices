@@ -11,4 +11,5 @@ interface EventBus {
     fun publish(event: Event, eventType: Class<*>, topic: String)
     fun register(handlers: Map<Class<*>, EventHandler>): Route
     fun subscribe(topic: String, subscription: String, endpoint: String)
+    fun createTopic(topic: String)
 }
