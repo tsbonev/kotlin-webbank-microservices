@@ -12,12 +12,7 @@ import com.google.pubsub.v1.PubsubMessage
  */
 internal class PubsubPublisherProvider : PublisherProvider<PubsubMessage, Publisher> {
 
-    private fun initiatePublisher(topic: String){
-        PubsubTopicCreator().create(topic)
-    }
-
     override fun get(topic: String): PublisherWrapper<PubsubMessage, Publisher> {
-        initiatePublisher(topic)
         val projectId = ServiceOptions.getDefaultProjectId()
         val topicName = ProjectTopicName.of(projectId, topic)
 

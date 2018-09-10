@@ -15,7 +15,6 @@ import com.clouway.bankapp.core.security.MD5PasswordHasher
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
 import com.clouway.pubsub.factory.EventBusFactory
-import com.google.appengine.api.memcache.MemcacheServiceFactory
 import com.google.appengine.api.utils.SystemProperty
 import spark.Filter
 import spark.Route
@@ -26,6 +25,7 @@ import spark.servlet.SparkApplication
 class AppBootstrap : SparkApplication{
     override fun init() {
 
+        val userChangeTopic = "user-change"
 
         val jsonSerializer = GsonSerializer()
         val responseTransformer = JsonResponseTransformer(jsonSerializer)
@@ -53,8 +53,8 @@ class AppBootstrap : SparkApplication{
                 forbiddenAfterLoginPaths = forbiddenAfterLoginPaths)
         val passwordHasher = MD5PasswordHasher()
 
-        val eventPublisher = EventBusFactory.createAsyncPubsubEventBus()
-        val asyncEventListener = AsyncUserChangeListener(eventPublisher)
+        val eventBus = EventBusFactory.createAsyncPubsubEventBus()
+        val asyncEventListener = AsyncUserChangeListener(eventBus, userChangeTopic)
 
         val userChangeListeners = object: UserChangeListener{
             val listeners = if(inProduction()) listOf(asyncEventListener) else emptyList()
@@ -85,6 +85,8 @@ class AppBootstrap : SparkApplication{
         val loginController = LoginController(cachedUserRepo, sessionLoader, jsonSerializer, hasher = passwordHasher, listeners = userChangeListeners)
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
+
+        eventBus.createTopic(userChangeTopic)
 
         before(Filter { _, res ->
             res.raw().characterEncoding = "UTF-8"

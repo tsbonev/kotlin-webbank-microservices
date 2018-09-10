@@ -8,10 +8,8 @@ import com.google.appengine.repackaged.com.google.gson.Gson
 import com.google.cloud.ServiceOptions
 import com.google.cloud.pubsub.v1.Publisher
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient
-import com.google.pubsub.v1.ProjectSubscriptionName
-import com.google.pubsub.v1.ProjectTopicName
-import com.google.pubsub.v1.PubsubMessage
-import com.google.pubsub.v1.PushConfig
+import com.google.cloud.pubsub.v1.TopicAdminClient
+import com.google.pubsub.v1.*
 import org.eclipse.jetty.http.HttpStatus
 import spark.Route
 
@@ -62,6 +60,23 @@ internal class AsyncPubsubEventBus(private val publisherProvider: PublisherProvi
             publisher.publish(convertedEvent)
         }finally {
             publisher.shutdown()
+        }
+    }
+
+    override fun createTopic(topic: String) {
+        TopicAdminClient.create().use { topicAdminClient ->
+            val projectId = ServiceOptions.getDefaultProjectId()
+            val listTopicRequest = ListTopicsRequest
+                    .newBuilder()
+                    .setProject(ProjectName.format(projectId))
+                    .build()
+            val response = topicAdminClient.listTopics(listTopicRequest)
+            val topics = response.iterateAll()
+
+            topics.forEach{
+                if(it.name == topic) return
+            }
+            topicAdminClient.createTopic(topic)
         }
     }
 }
