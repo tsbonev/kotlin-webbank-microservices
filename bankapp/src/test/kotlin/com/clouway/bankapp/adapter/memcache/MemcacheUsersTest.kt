@@ -1,6 +1,6 @@
 package com.clouway.bankapp.adapter.memcache
 
-import com.clouway.bankapp.adapter.gae.memcache.MemcacheUserRepository
+import com.clouway.bankapp.adapter.gae.memcache.MemcacheUsers
 import com.clouway.bankapp.core.*
 import com.google.appengine.api.memcache.MemcacheServiceFactory
 import org.jmock.AbstractExpectations.returnValue
@@ -20,7 +20,7 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class MemcacheUserTest {
+class MemcacheUsersTest {
 
     @Rule
     @JvmField
@@ -39,9 +39,9 @@ class MemcacheUserTest {
     private val testUser = User(testId, "::username::", "::email::", "::password::")
     private val testRegistrationRequest = UserRegistrationRequest("::username::", "::email::", "::password::", testId)
 
-    private val mockPersistentRepository = context.mock(UserRepository::class.java)
+    private val mockPersistentRepository = context.mock(Users::class.java)
 
-    private val userMemcacheRepo = MemcacheUserRepository(mockPersistentRepository)
+    private val userMemcacheRepo = MemcacheUsers(mockPersistentRepository)
 
     private val idPrefix = "user"
 

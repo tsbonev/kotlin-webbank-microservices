@@ -5,7 +5,7 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-interface UserRepository {
+interface Users {
     
     fun getById(id: String): Optional<User>
     fun deleteById(id: String)

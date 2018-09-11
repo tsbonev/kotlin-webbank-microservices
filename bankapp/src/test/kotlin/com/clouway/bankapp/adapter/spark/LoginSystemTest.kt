@@ -31,8 +31,8 @@ class LoginSystemTest {
         checking(Expectations().apply(block))
     }
 
-    private val userRepo = context.mock(UserRepository::class.java)
-    private val sessionRepository = context.mock(SessionRepository::class.java)
+    private val userRepo = context.mock(Users::class.java)
+    private val sessionRepository = context.mock(Sessions::class.java)
     private val jsonSerializer = context.mock(JsonSerializer::class.java)
 
     private val SID = "123"

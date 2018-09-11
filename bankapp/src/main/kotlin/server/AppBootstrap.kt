@@ -1,10 +1,10 @@
 package server
 
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessionRepository
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactionRepository
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreUserRepository
-import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
-import com.clouway.bankapp.adapter.gae.memcache.MemcacheUserRepository
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessions
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactions
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreUsers
+import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessions
+import com.clouway.bankapp.adapter.gae.memcache.MemcacheUsers
 import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
@@ -29,13 +29,13 @@ class AppBootstrap : SparkApplication{
 
         val jsonSerializer = GsonSerializer()
         val responseTransformer = JsonResponseTransformer(jsonSerializer)
-        val persistentUserRepo = DatastoreUserRepository()
-        val cachedUserRepo = MemcacheUserRepository(persistentUserRepo)
-        val sessionRepo = DatastoreSessionRepository()
-        val transactionRepo = DatastoreTransactionRepository()
+        val persistentUserRepo = DatastoreUsers()
+        val cachedUserRepo = MemcacheUsers(persistentUserRepo)
+        val sessionRepo = DatastoreSessions()
+        val transactionRepo = DatastoreTransactions()
         val sessionProvider = ThreadLocalSessionProvider()
 
-        val sessionLoader = MemcacheSessionRepository(sessionRepo)
+        val sessionLoader = MemcacheSessions(sessionRepo)
 
         val openPaths = listOf(
                 "/login",

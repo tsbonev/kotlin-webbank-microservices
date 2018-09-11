@@ -1,6 +1,6 @@
 package com.clouway.bankapp.adapter.datastore
 
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessionRepository
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreSessions
 import com.clouway.bankapp.core.Session
 import com.clouway.bankapp.core.SessionRequest
 import org.junit.Test
@@ -14,7 +14,7 @@ import org.hamcrest.CoreMatchers.`is` as Is
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class SessionRepositoryTest {
+class DatastoreSessionsTest {
 
     @Rule
     @JvmField
@@ -24,7 +24,7 @@ class SessionRepositoryTest {
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
     private val yesterday =  LocalDateTime.of(2018, 8, 1, 10, 36, 23, 905000000)
     private val refreshDays = 10L
-    private val sessionRepo = DatastoreSessionRepository(getInstant = {now}, sessionRefreshDays = refreshDays)
+    private val sessionRepo = DatastoreSessions(getInstant = {now}, sessionRefreshDays = refreshDays)
 
     private val testId = UUID.randomUUID().toString()
 
