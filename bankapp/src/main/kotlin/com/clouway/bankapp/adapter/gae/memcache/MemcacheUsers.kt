@@ -10,7 +10,7 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class MemcacheUserRepository(private val origin: UserRepository) : UserRepository {
+class MemcacheUsers(private val origin: Users) : Users {
 
     private val ID_PREFIX = "user"
     private val USER_KIND = "User"

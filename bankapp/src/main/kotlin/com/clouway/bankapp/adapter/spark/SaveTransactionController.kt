@@ -3,7 +3,7 @@ package com.clouway.bankapp.adapter.spark
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.core.JsonSerializer
 import com.clouway.bankapp.core.Session
-import com.clouway.bankapp.core.TransactionRepository
+import com.clouway.bankapp.core.Transactions
 import com.clouway.bankapp.core.TransactionRequest
 import org.eclipse.jetty.http.HttpStatus
 import spark.Request
@@ -12,7 +12,7 @@ import spark.Response
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class SaveTransactionController(private val transactionRepo: TransactionRepository,
+class SaveTransactionController(private val transactionRepo: Transactions,
                                 private val serializer: JsonSerializer,
                                 private val listeners: UserChangeListener) : SecureController {
 

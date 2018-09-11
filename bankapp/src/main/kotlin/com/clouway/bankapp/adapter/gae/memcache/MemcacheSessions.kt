@@ -11,8 +11,8 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class MemcacheSessionRepository(private val origin: SessionRepository)
-    : SessionRepository {
+class MemcacheSessions(private val origin: Sessions)
+    : Sessions {
 
     private val ID_PREFIX = "sid"
     private val SESSION_KIND = "Session"

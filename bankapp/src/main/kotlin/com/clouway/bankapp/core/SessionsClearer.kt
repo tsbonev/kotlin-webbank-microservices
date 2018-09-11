@@ -5,6 +5,6 @@ import java.time.LocalDateTime
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-interface SessionClearer {
+interface SessionsClearer {
     fun deleteSessionsExpiringBefore(date: LocalDateTime)
 }

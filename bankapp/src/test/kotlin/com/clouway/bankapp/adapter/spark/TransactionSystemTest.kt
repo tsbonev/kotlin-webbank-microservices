@@ -32,7 +32,7 @@ class TransactionSystemTest {
         checking(Expectations().apply(block))
     }
 
-    private val transactionRepo = context.mock(TransactionRepository::class.java)
+    private val transactionRepo = context.mock(Transactions::class.java)
     private val jsonSerializer = context.mock(JsonSerializer::class.java)
     private val userChangeListener = context.mock(UserChangeListener::class.java)
 

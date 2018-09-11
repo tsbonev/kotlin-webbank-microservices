@@ -5,12 +5,11 @@ import com.clouway.entityhelper.TypedEntity
 import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.util.*
-import kotlin.math.absoluteValue
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class DatastoreUserRepository : UserRepository {
+class DatastoreUsers : Users {
 
     private val USER_KIND = "User"
 

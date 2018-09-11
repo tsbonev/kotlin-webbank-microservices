@@ -3,7 +3,7 @@ package com.clouway.bankapp.core
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-interface TransactionRepository {
+interface Transactions {
 
     fun save(transactionRequest: TransactionRequest): Transaction
 

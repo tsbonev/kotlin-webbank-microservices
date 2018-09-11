@@ -6,7 +6,7 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-interface SessionRepository {
+interface Sessions {
 
     fun issueSession(sessionRequest: SessionRequest): Session
     fun terminateSession(sessionId: String)

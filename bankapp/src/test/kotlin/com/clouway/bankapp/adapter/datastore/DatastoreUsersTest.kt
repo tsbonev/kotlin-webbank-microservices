@@ -1,6 +1,6 @@
 package com.clouway.bankapp.adapter.datastore
 
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreUserRepository
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreUsers
 import com.clouway.bankapp.core.User
 import com.clouway.bankapp.core.UserAlreadyExistsException
 import com.clouway.bankapp.core.UserRegistrationRequest
@@ -14,13 +14,13 @@ import org.hamcrest.CoreMatchers.`is` as Is
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class UserRepositoryTest {
+class DatastoreUsersTest {
 
     @Rule
     @JvmField
     val helper: DatastoreRule = DatastoreRule()
 
-    private val userRepo = DatastoreUserRepository()
+    private val userRepo = DatastoreUsers()
 
     private val testId = UUID.randomUUID().toString()
     private val registerJohn = UserRegistrationRequest("John", "email", "password", testId)

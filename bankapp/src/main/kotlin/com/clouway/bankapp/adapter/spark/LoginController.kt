@@ -12,8 +12,8 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class LoginController(private val userRepo: UserRepository,
-                      private val sessionRepository: SessionRepository,
+class LoginController(private val userRepo: Users,
+                      private val sessions: Sessions,
                       private val serializer: JsonSerializer,
                       private val sessionLifetime: Long = 10,
                       private val getExpirationDate: () -> LocalDateTime = {
@@ -43,7 +43,7 @@ class LoginController(private val userRepo: UserRepository,
                 return response.status(HttpStatus.UNAUTHORIZED_401)
             }
 
-            sessionRepository.issueSession(SessionRequest(
+            sessions.issueSession(SessionRequest(
                     retrievedUser.id,
                     SID,
                     retrievedUser.username,

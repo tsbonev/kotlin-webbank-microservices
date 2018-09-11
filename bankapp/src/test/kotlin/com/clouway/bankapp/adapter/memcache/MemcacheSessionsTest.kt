@@ -1,6 +1,6 @@
 package com.clouway.bankapp.adapter.memcache
 
-import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessionRepository
+import com.clouway.bankapp.adapter.gae.memcache.MemcacheSessions
 import com.clouway.bankapp.core.*
 import org.jmock.Expectations
 import org.jmock.Mockery
@@ -17,7 +17,7 @@ import org.hamcrest.CoreMatchers.`is` as Is
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class MemcacheSessionTest {
+class MemcacheSessionsTest {
 
     @Rule
     @JvmField
@@ -34,8 +34,8 @@ class MemcacheSessionTest {
     private val now = LocalDateTime.of(2018, 8, 2, 10, 36, 23, 905000000)
     private val tomorrow = LocalDateTime.of(2018, 8, 3, 10, 36, 23, 905000000)
 
-    private val mockPersistentSessionRepository = context.mock(SessionRepository::class.java)
-    private val memcacheSessionRepository = MemcacheSessionRepository(mockPersistentSessionRepository)
+    private val mockPersistentSessionRepository = context.mock(Sessions::class.java)
+    private val memcacheSessionRepository = MemcacheSessions(mockPersistentSessionRepository)
 
     private val testId = UUID.randomUUID().toString()
 

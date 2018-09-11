@@ -7,14 +7,13 @@ import com.google.appengine.api.datastore.*
 import com.google.appengine.api.datastore.FetchOptions.Builder.withLimit
 import java.time.LocalDateTime
 import java.util.*
-import kotlin.math.absoluteValue
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class DatastoreTransactionRepository(private val limit: Int = 100,
-                                     private val getInstant:  () -> LocalDateTime = {LocalDateTime.now()}
-) : TransactionRepository {
+class DatastoreTransactions(private val limit: Int = 100,
+                            private val getInstant:  () -> LocalDateTime = {LocalDateTime.now()}
+) : Transactions {
 
     private val TRANSACTION_KIND = "Transaction"
     private val USER_KIND = "User"

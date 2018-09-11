@@ -1,6 +1,6 @@
 package com.clouway.bankapp.core.security
 
-import com.clouway.bankapp.core.SessionRepository
+import com.clouway.bankapp.core.Sessions
 import org.eclipse.jetty.http.HttpStatus
 import spark.Filter
 import spark.Request
@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class SecurityFilter(private val sessionRepo: SessionRepository,
+class SecurityFilter(private val sessionRepo: Sessions,
                      private val sessionProvider: SessionProvider,
                      private val openPaths: List<String> = emptyList(),
                      private val forbiddenAfterLoginPaths: List<String> = emptyList(),

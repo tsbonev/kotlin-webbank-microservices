@@ -1,8 +1,8 @@
 package com.clouway.bankapp.adapter.gae.datastore
 
-import com.clouway.bankapp.core.SessionClearer
-import com.clouway.bankapp.core.SessionCounter
-import com.clouway.bankapp.core.SessionRepository
+import com.clouway.bankapp.core.SessionsClearer
+import com.clouway.bankapp.core.SessionsCounter
+import com.clouway.bankapp.core.Sessions
 import com.clouway.bankapp.core.*
 import com.clouway.entityhelper.TypedEntity
 import com.clouway.entityhelper.toUtilDate
@@ -14,10 +14,10 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class DatastoreSessionRepository(private val limit: Int = 100,
-                                 private val getInstant: () -> LocalDateTime = {LocalDateTime.now()},
-                                 private val sessionRefreshDays: Long = 10
-) : SessionRepository, SessionClearer, SessionCounter {
+class DatastoreSessions(private val limit: Int = 100,
+                        private val getInstant: () -> LocalDateTime = {LocalDateTime.now()},
+                        private val sessionRefreshDays: Long = 10
+) : Sessions, SessionsClearer, SessionsCounter {
 
     private val SESSION_KIND = "Session"
 

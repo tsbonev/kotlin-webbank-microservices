@@ -1,6 +1,6 @@
 package com.clouway.bankapp.adapter.datastore
 
-import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactionRepository
+import com.clouway.bankapp.adapter.gae.datastore.DatastoreTransactions
 import com.clouway.bankapp.core.*
 import com.google.appengine.api.datastore.DatastoreServiceFactory
 import com.google.appengine.api.datastore.Entity
@@ -15,13 +15,13 @@ import org.hamcrest.CoreMatchers.`is` as Is
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class TransactionRepositoryTest {
+class DatastoreTransactionsTest {
 
     @Rule
     @JvmField
     val helper: DatastoreRule = DatastoreRule()
 
-    private val transactionRepo = DatastoreTransactionRepository()
+    private val transactionRepo = DatastoreTransactions()
     private val testId = UUID.randomUUID().toString()
     private val transactionRequest = TransactionRequest(testId, Operation.DEPOSIT, 200.0)
 
