@@ -16,7 +16,7 @@ class AppBootstrap : SparkApplication {
 
         val projectId = ServiceOptions.getDefaultProjectId()
         val logServiceUrl = "https://log-dot-$projectId.appspot.com"
-        val pushUrl = "/_ah/push-handlers/pubsub/log"
+        val pushUrl = "/_ah/push-handlers/pubsub/message"
 
         val logger = DatastoreLogger()
 
@@ -31,8 +31,8 @@ class AppBootstrap : SparkApplication {
 
         eventBus.subscribe("user-change",
                 "user-change-logging-service",
-                "$logServiceUrl$pushUrl/message")
+                "$logServiceUrl$pushUrl")
 
-        post("$pushUrl/message", eventBus.register(handlerMap))
+        post(pushUrl, eventBus.register(handlerMap))
     }
 }
