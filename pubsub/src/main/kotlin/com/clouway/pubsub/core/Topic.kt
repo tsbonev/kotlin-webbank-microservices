@@ -5,6 +5,6 @@ import com.clouway.pubsub.core.event.Event
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-internal interface EventConverter<out T> {
-    fun convertEvent(event: Event): T
+interface Topic {
+    fun publish(event: Event)
 }

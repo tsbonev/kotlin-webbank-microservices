@@ -2,10 +2,9 @@ package server
 
 import com.clouway.mailservice.adapter.spark.MailEventHandler
 import com.clouway.mailservice.core.SendGridMailer
-import com.clouway.pubsub.core.event.EventHandler
 import com.clouway.pubsub.core.event.UserLoggedOutEvent
 import com.clouway.pubsub.core.event.UserRegisteredEvent
-import com.clouway.pubsub.factory.EventBusFactory
+import com.clouway.pubsub.factory.PubsubFactory
 import com.google.appengine.repackaged.com.google.common.io.CharStreams
 import com.google.appengine.tools.cloudstorage.GcsFilename
 import com.google.appengine.tools.cloudstorage.GcsServiceFactory
@@ -25,7 +24,6 @@ class AppBootstrap : SparkApplication {
         val mailServiceUrl = "https://mail-dot-$projectId.appspot.com"
         val pushUrl = "/_ah/push-handlers/pubsub/message"
 
-        val eventBus = EventBusFactory.createAsyncPubsubEventBus()
 
         val apiKeyFile = GcsFilename("sacred-union-210613.appspot.com",
                 "sendgrid.env")
@@ -39,23 +37,26 @@ class AppBootstrap : SparkApplication {
 
         val mailer = SendGridMailer(sendgridApiKey.trim())
 
-        val handlerMap =  mapOf<Class<*>, EventHandler>(
-                UserLoggedOutEvent::class.java to MailEventHandler(
-                  "You have logged out of the spark bank",
-                        "This was sent via a push pubsub",
-                        mailer
-                ),
-                UserRegisteredEvent::class.java to MailEventHandler(
-                        "Welcome to the spark bank",
-                        "This was sent via a push pubsub",
-                        mailer)
-        )
-
-        eventBus.subscribe("user-change",
+        val subscription = PubsubFactory.createPubsubSubscription("user-change",
                 "user-change-mail-service",
                 "$mailServiceUrl$pushUrl")
 
-        post(pushUrl, eventBus.register(handlerMap))
+        subscription.registerEventHandler(UserLoggedOutEvent::class.java,
+                MailEventHandler(
+                        "You have logged out of the spark bank",
+                        "This was sent via a push pubsub",
+                        mailer
+                ))
+
+        subscription.registerEventHandler(UserRegisteredEvent::class.java,
+                MailEventHandler(
+                        "Welcome to the spark bank",
+                        "This was sent via a push pubsub",
+                        mailer))
+
+        post(pushUrl) {
+            req, res -> subscription.handle(req.raw(), res.raw())
+        }
 
     }
 }
