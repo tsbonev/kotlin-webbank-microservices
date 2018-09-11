@@ -8,9 +8,7 @@ import com.clouway.bankapp.adapter.gae.memcache.MemcacheUsers
 import com.clouway.bankapp.adapter.gae.pubsub.AsyncUserChangeListener
 import com.clouway.bankapp.adapter.gae.pubsub.UserChangeListener
 import com.clouway.bankapp.adapter.spark.*
-import com.clouway.bankapp.core.GsonSerializer
-import com.clouway.bankapp.core.Operation
-import com.clouway.bankapp.core.User
+import com.clouway.bankapp.core.*
 import com.clouway.bankapp.core.security.MD5PasswordHasher
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
@@ -29,13 +27,20 @@ class AppBootstrap : SparkApplication{
 
         val jsonSerializer = GsonSerializer()
         val responseTransformer = JsonResponseTransformer(jsonSerializer)
-        val persistentUserRepo = DatastoreUsers()
-        val cachedUserRepo = MemcacheUsers(persistentUserRepo)
-        val sessionRepo = DatastoreSessions()
-        val transactionRepo = DatastoreTransactions()
+
+        val usersPersistence = DatastoreUsers()
+        val usersCache = MemcacheUsers()
+
+        val users = UsersDecorator(usersCache, usersPersistence)
+
+        val sessionsPersistence = DatastoreSessions()
+        val sessionsCache = MemcacheSessions()
+
+        val persistentTransactions = DatastoreTransactions()
+
         val sessionProvider = ThreadLocalSessionProvider()
 
-        val sessionLoader = MemcacheSessions(sessionRepo)
+        val sessions = SessionsDecorator(sessionsCache, sessionsPersistence)
 
         val openPaths = listOf(
                 "/login",
@@ -47,7 +52,7 @@ class AppBootstrap : SparkApplication{
                 "/register"
         )
 
-        val securityFilter = SecurityFilter(sessionLoader,
+        val securityFilter = SecurityFilter(sessions,
                 sessionProvider,
                 openPaths = openPaths,
                 forbiddenAfterLoginPaths = forbiddenAfterLoginPaths)
@@ -79,12 +84,12 @@ class AppBootstrap : SparkApplication{
             }
         }
 
-        val registerController = RegisterController(cachedUserRepo, jsonSerializer, passwordHasher, userChangeListeners)
-        val listTransactionController = ListTransactionController(transactionRepo)
-        val saveTransactionController = SaveTransactionController(transactionRepo, jsonSerializer, userChangeListeners)
-        val loginController = LoginController(cachedUserRepo, sessionLoader, jsonSerializer, hasher = passwordHasher, listeners = userChangeListeners)
+        val registerController = RegisterController(users, jsonSerializer, passwordHasher, userChangeListeners)
+        val listTransactionController = ListTransactionController(persistentTransactions)
+        val saveTransactionController = SaveTransactionController(persistentTransactions, jsonSerializer, userChangeListeners)
+        val loginController = LoginController(users, sessions, jsonSerializer, hasher = passwordHasher, listeners = userChangeListeners)
         val userController = UserController()
-        val logoutController = LogoutController(sessionLoader, userChangeListeners)
+        val logoutController = LogoutController(sessions, userChangeListeners)
 
         eventBus.createTopic(userChangeTopic)
 
@@ -114,7 +119,7 @@ class AppBootstrap : SparkApplication{
 
         get("/active", Route{
             _, _ ->
-            return@Route sessionRepo.getActiveSessionsCount()
+            return@Route sessionsPersistence.getActiveSessionsCount()
         }, responseTransformer)
 
 
