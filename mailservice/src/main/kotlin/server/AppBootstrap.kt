@@ -23,7 +23,7 @@ class AppBootstrap : SparkApplication {
 
         val projectId = ServiceOptions.getDefaultProjectId()
         val mailServiceUrl = "https://mail-dot-$projectId.appspot.com"
-        val pushUrl = "/_ah/push-handlers/pubsub/mail"
+        val pushUrl = "/_ah/push-handlers/pubsub/message"
 
         val eventBus = EventBusFactory.createAsyncPubsubEventBus()
 
@@ -53,9 +53,9 @@ class AppBootstrap : SparkApplication {
 
         eventBus.subscribe("user-change",
                 "user-change-mail-service",
-                "$mailServiceUrl$pushUrl/message")
+                "$mailServiceUrl$pushUrl")
 
-        post("$pushUrl/message", eventBus.register(handlerMap))
+        post(pushUrl, eventBus.register(handlerMap))
 
     }
 }
