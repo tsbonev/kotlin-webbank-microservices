@@ -37,7 +37,7 @@ class MemcacheUsersTest {
     private val testId = UUID.randomUUID().toString()
 
     private val testUser = User(testId, "::username::", "::email::", "::password::")
-    private val testRegistrationRequest = UserRegistrationRequest("::username::", "::email::", "::password::", testId)
+    private val testRegistrationRequest = UserRegistrationRequest("::username::", "::email::", "::password::")
 
     private val mockPersistentRepository = context.mock(Users::class.java)
 

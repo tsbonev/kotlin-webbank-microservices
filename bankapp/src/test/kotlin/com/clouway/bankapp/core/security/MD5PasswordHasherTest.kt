@@ -13,7 +13,7 @@ class MD5PasswordHasherTest {
 
     private val hasher = MD5PasswordHasher()
 
-    private val registerRequest = UserRegistrationRequest("::username::", "::email::", "::password::", UUID.randomUUID().toString())
+    private val registerRequest = UserRegistrationRequest("::username::", "::email::", "::password::")
 
     @Test
     fun shouldHashAndMatchPassword(){

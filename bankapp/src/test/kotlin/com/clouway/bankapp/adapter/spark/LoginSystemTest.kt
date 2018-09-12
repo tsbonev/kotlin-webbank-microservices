@@ -72,7 +72,7 @@ class LoginSystemTest {
 
     private val testId = UUID.randomUUID().toString()
     private val testUser = User(testId, "John", "email", "password")
-    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password", testId)
+    private val testUserRegistrationRequest = UserRegistrationRequest("John","email", "password")
     private val testUserLoginRequest = UserLoginRequest("John","password")
     private val possibleUser = Optional.of(testUser)
     private val testSession = Session(testId, SID, testDate, "John", "email")

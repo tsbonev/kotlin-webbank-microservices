@@ -60,7 +60,7 @@ class DatastoreUsers : Users {
 
     override fun registerIfNotExists(registerRequest: UserRegistrationRequest): User {
 
-        val user = User(registerRequest.id ?: UUID.randomUUID().toString(),
+        val user = User(UUID.randomUUID().toString(),
                 registerRequest.username,
                 registerRequest.email,
                 registerRequest.password)

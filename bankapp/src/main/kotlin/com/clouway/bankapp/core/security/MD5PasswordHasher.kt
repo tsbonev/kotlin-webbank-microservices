@@ -15,8 +15,7 @@ class MD5PasswordHasher : PasswordHasher {
         return UserRegistrationRequest(
                 request.username,
                 request.email,
-                Credential.MD5.digest(request.password).removePrefix("MD5:"),
-                request.id
+                Credential.MD5.digest(request.password).removePrefix("MD5:")
         )
     }
 }
