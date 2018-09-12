@@ -12,12 +12,12 @@ import java.time.LocalDateTime
  */
 internal class PubsubEventConverter(private val getInstant: () -> LocalDateTime = { LocalDateTime.now()})
     : EventConverter<PubsubMessage> {
-    override fun convertEvent(event: Event, eventType: Class<*>): PubsubMessage {
+    override fun convertEvent(event: Event): PubsubMessage {
         val gson = Gson()
         val jsonEvent = gson.toJson(event)
         val data = ByteString.copyFromUtf8(jsonEvent)
         return PubsubMessage.newBuilder().setData(data)
-                .putAttributes("eventType", eventType.name)
+                .putAttributes("eventType", event::class.java.name)
                 .putAttributes("time", gson.toJson(getInstant()))
                 .build()
     }

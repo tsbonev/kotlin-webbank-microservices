@@ -3,6 +3,7 @@ package com.clouway.loggingservice.adapter.spark
 import com.clouway.loggingservice.core.Log
 import com.clouway.loggingservice.core.Logger
 import com.clouway.pubsub.core.event.Event
+import com.clouway.pubsub.core.event.EventWithAttributes
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.throwException
 import org.jmock.Expectations
@@ -10,8 +11,6 @@ import org.jmock.Mockery
 import org.jmock.integration.junit4.JUnitRuleMockery
 import org.junit.Rule
 import org.junit.Test
-import spark.Request
-import spark.Response
 import java.time.LocalDateTime
 
 import org.hamcrest.CoreMatchers.`is` as Is
@@ -35,25 +34,11 @@ class LogEventHandlerTest {
 
     private val mockLogger = context.mock(Logger::class.java)
 
-    private val fakeRequest = object : Request(){
+    private val event = TestEvent("::data::")
 
-        override fun <T : Any?> attribute(attribute: String?): T {
-            if(attribute == "event") return testEvent as T
-            if(attribute == "eventType") return TestEvent::class.java.name as T
-            if(attribute == "time") return testInstant as T
-            throw Exception()
-        }
-    }
+    private val instant = LocalDateTime.of(1, 1, 1, 1, 1, 1)
 
-    private val fakeResponse = object : Response(){
-
-    }
-
-    private val testEvent = TestEvent("::data::")
-
-    private val testInstant = LocalDateTime.of(1, 1, 1, 1, 1, 1)
-
-    private val testLog = Log(testEvent, TestEvent::class.java, testInstant)
+    private val log = Log(event, TestEvent::class.java, instant)
 
     private val logEventHandler = LogEventHandler(mockLogger)
 
@@ -61,20 +46,28 @@ class LogEventHandlerTest {
     fun shouldCallStoreLog(){
 
         context.expecting {
-            oneOf(mockLogger).storeLog(testLog)
+            oneOf(mockLogger).storeLog(log)
         }
 
-        logEventHandler.handle(fakeRequest, fakeResponse)
+        logEventHandler.handle(EventWithAttributes(event,
+                mapOf(
+                        "time" to instant,
+                        "eventType" to event::class.java.name
+                )))
     }
 
     @Test
     fun shouldReturnInternalErrorOnException(){
         context.expecting {
-            oneOf(mockLogger).storeLog(testLog)
+            oneOf(mockLogger).storeLog(log)
             will(throwException(Exception()))
         }
 
-        assertThat(logEventHandler.handle(fakeRequest, fakeResponse) as Int,
+        assertThat(logEventHandler.handle(EventWithAttributes(event,
+                mapOf(
+                        "time" to instant,
+                        "eventType" to event::class.java.name
+                ))) as Int,
                 Is(HttpStatus.INTERNAL_SERVER_ERROR_500))
     }
 }

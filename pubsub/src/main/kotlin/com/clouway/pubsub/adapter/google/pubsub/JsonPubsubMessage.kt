@@ -7,7 +7,7 @@ import java.util.*
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-data class JsonPubsubMessage(val attributes: Map<String, String>, val data: String, val messageId: String){
+internal data class JsonPubsubMessage(val attributes: Map<String, String>, val data: String, val messageId: String){
 
     fun getTime(): LocalDateTime {
         val gson = Gson()

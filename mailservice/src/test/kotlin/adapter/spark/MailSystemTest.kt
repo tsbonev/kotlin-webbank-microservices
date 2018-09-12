@@ -3,6 +3,8 @@ package adapter.spark
 import com.clouway.mailservice.adapter.spark.MailEventHandler
 import com.clouway.mailservice.core.Mailer
 import com.clouway.mailservice.core.SendGridMailer
+import com.clouway.pubsub.core.event.Event
+import com.clouway.pubsub.core.event.EventWithAttributes
 import org.eclipse.jetty.http.HttpStatus
 import org.jmock.AbstractExpectations.returnValue
 import org.jmock.Expectations
@@ -21,7 +23,7 @@ import sun.reflect.generics.reflectiveObjects.NotImplementedException
  */
 class MailSystemTest {
 
-    data class TestEmailEvent(val email: String)
+    data class TestEmailEvent(val email: String) : Event
     
     @Rule
     @JvmField
@@ -37,18 +39,6 @@ class MailSystemTest {
 
     private val testEmailEvent = TestEmailEvent("::email::")
 
-    private val req = object: Request(){
-
-        override fun <T : Any?> attribute(attribute: String?): T {
-            if(attribute == "event") return testEmailEvent as T
-            throw NotImplementedException()
-        }
-    }
-
-    private val res = object: Response() {
-
-    }
-
     @Test
     fun handlerShouldSendMail(){
 
@@ -59,7 +49,8 @@ class MailSystemTest {
             will(returnValue(HttpStatus.OK_200))
         }
 
-        assertThat(mailHandler.handle(req, res) as Int, Is(HttpStatus.OK_200))
+        assertThat(mailHandler.handle(EventWithAttributes(testEmailEvent,
+                emptyMap())) as Int, Is(HttpStatus.OK_200))
     }
 
 }

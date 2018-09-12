@@ -14,7 +14,7 @@ import com.clouway.bankapp.core.User
 import com.clouway.bankapp.core.security.MD5PasswordHasher
 import com.clouway.bankapp.core.security.SecurityFilter
 import com.clouway.bankapp.core.security.ThreadLocalSessionProvider
-import com.clouway.pubsub.factory.EventBusFactory
+import com.clouway.pubsub.factory.PubsubFactory
 import com.google.appengine.api.utils.SystemProperty
 import spark.Filter
 import spark.Route
@@ -53,8 +53,8 @@ class AppBootstrap : SparkApplication{
                 forbiddenAfterLoginPaths = forbiddenAfterLoginPaths)
         val passwordHasher = MD5PasswordHasher()
 
-        val eventBus = EventBusFactory.createAsyncPubsubEventBus()
-        val asyncEventListener = AsyncUserChangeListener(eventBus, userChangeTopic)
+        val topic = PubsubFactory.createPubsubTopic(userChangeTopic)
+        val asyncEventListener = AsyncUserChangeListener(topic)
 
         val userChangeListeners = object: UserChangeListener{
             val listeners = if(inProduction()) listOf(asyncEventListener) else emptyList()
@@ -85,8 +85,6 @@ class AppBootstrap : SparkApplication{
         val loginController = LoginController(cachedUserRepo, sessionLoader, jsonSerializer, hasher = passwordHasher, listeners = userChangeListeners)
         val userController = UserController()
         val logoutController = LogoutController(sessionLoader, userChangeListeners)
-
-        eventBus.createTopic(userChangeTopic)
 
         before(Filter { _, res ->
             res.raw().characterEncoding = "UTF-8"
