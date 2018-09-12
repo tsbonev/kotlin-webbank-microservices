@@ -16,7 +16,7 @@ class MD5PasswordHasherTest {
     private val registerRequest = UserRegistrationRequest("::username::", "::email::", "::password::")
 
     @Test
-    fun shouldHashAndMatchPassword(){
+    fun hashAndMatchPassword(){
         val hashedRequest = hasher.hashRequest(registerRequest)
 
         assertThat(hasher.matching(registerRequest.password, hashedRequest.password), Is(true))

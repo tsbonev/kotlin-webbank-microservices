@@ -9,7 +9,6 @@ import org.junit.Test
 import org.junit.Assert.assertThat
 import org.junit.Rule
 import rule.DatastoreRule
-import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -21,49 +20,54 @@ class DatastoreTransactionsTest {
     @JvmField
     val helper: DatastoreRule = DatastoreRule()
 
-    private val transactionRepo = DatastoreTransactions()
-    private val testId = UUID.randomUUID().toString()
-    private val transactionRequest = TransactionRequest(testId, Operation.DEPOSIT, 200.0)
+    private val transactions = DatastoreTransactions()
+    private val transactionRequest = TransactionRequest("::id::", Operation.DEPOSIT, 200.0)
 
     @Before
     fun setUp() {
-        val userEntity = Entity("User", testId)
-        userEntity.setProperty("username", "John")
+        val userEntity = Entity("User", "::id::")
+        userEntity.setProperty("username", "::username::")
         DatastoreServiceFactory.getDatastoreService().put(userEntity)
     }
 
     @Test
-    fun shouldSaveTransaction(){
+    fun saveTransaction(){
+        val savedTransaction = transactions.save(transactionRequest)
 
-        transactionRepo.save(transactionRequest)
-
-        assertThat(transactionRepo.getUserTransactions(testId).isNotEmpty(), Is(true))
+        assertThat(transactions.getUserTransactions("::id::").first(), Is(savedTransaction))
     }
 
     @Test
-    fun shouldReturnEmptyTransactionList(){
+    fun retrieveUserTransactions(){
+        val firstTransaction = transactions.save(transactionRequest)
+        val secondTransaction = transactions.save(transactionRequest.copy(operation = Operation.WITHDRAW))
 
-        assertThat(transactionRepo.getUserTransactions(testId).isEmpty(), Is(true))
+        val transactionList = listOf(firstTransaction, secondTransaction).sortedBy { it.id }
 
+        assertThat(transactions.getUserTransactions("::id::").sortedBy { it.id }, Is(transactionList))
     }
 
     @Test
-    fun shouldPaginateTransactions(){
+    fun returnEmptyTransactionList(){
+        assertThat(transactions.getUserTransactions("::id::").isEmpty(), Is(true))
+    }
 
+    @Test
+    fun paginateTransactions(){
         for(x in 1..10)
-            transactionRepo.save(
-                    TransactionRequest(testId,
+            transactions.save(
+                    TransactionRequest("::id::",
                             Operation.DEPOSIT,
                             200.0
                     )
             )
 
-        assertThat(transactionRepo
-                .getUserTransactions(testId, 1, 2)
+        assertThat(transactions
+                .getUserTransactions("::id::", 1, 2)
                 .size, Is(2))
 
-        assertThat(transactionRepo
-                .getUserTransactions(testId, 4, 3)
+        assertThat(transactions
+                .getUserTransactions("::id::", 4, 3)
                 .size, Is(1))
     }
 }
