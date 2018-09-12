@@ -8,7 +8,6 @@ import org.junit.Test
 import org.junit.Assert.assertThat
 import org.junit.Rule
 import rule.DatastoreRule
-import java.util.*
 import org.hamcrest.CoreMatchers.`is` as Is
 
 /**
@@ -22,64 +21,54 @@ class DatastoreUsersTest {
 
     private val userRepo = DatastoreUsers()
 
-    private val testId = UUID.randomUUID().toString()
-    private val registerJohn = UserRegistrationRequest("John", "email", "password", testId)
-    private val userJohn = User(testId, "John", "email", "password")
+    private val registrationRequest = UserRegistrationRequest("::username::", "::email::", "::password::")
+    private val user = User("::userId::", "::username::", "::email::", "::password::")
 
     @Test
-    fun shouldRegisterUser(){
-
-        val user = userRepo.registerIfNotExists(registerJohn)
+    fun returnRegisteredUser(){
+        val user = userRepo.registerIfNotExists(registrationRequest)
 
         assertThat(userRepo.getById(user.id).get() == user, Is(true))
-
     }
 
     @Test(expected = UserAlreadyExistsException::class)
-    fun shouldNotRegisterUserTwice(){
-
-        userRepo.registerIfNotExists(registerJohn)
-        userRepo.registerIfNotExists(registerJohn)
-
+    fun rejectRegistrationOfExistingUser(){
+        userRepo.registerIfNotExists(registrationRequest)
+        userRepo.registerIfNotExists(registrationRequest)
     }
 
     @Test
-    fun shouldGetByUsername(){
+    fun retrieveUserByUsername(){
+        val user = userRepo.registerIfNotExists(registrationRequest)
 
-        val user = userRepo.registerIfNotExists(registerJohn)
-
-        assertThat(userRepo.getByUsername(registerJohn.username).get(),
+        assertThat(userRepo.getByUsername(registrationRequest.username).get(),
                 Is(user))
-
     }
 
     @Test
-    fun shouldNotFindByUsername(){
-
-        assertThat(userRepo.getByUsername(userJohn.username).isPresent, Is(false))
-
-    }
-
-    @Test
-    fun shouldDeleteUserById(){
-
-        val user = userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
-
-        assertThat(userRepo.getById(user.id).isPresent, Is(true))
-
-        userRepo.deleteById(user.id)
+    fun returnEmptyWhenNotFound(){
+        assertThat(userRepo.getByUsername(user.username).isPresent, Is(false))
         assertThat(userRepo.getById(user.id).isPresent, Is(false))
     }
 
     @Test
-    fun shouldUpdateUser(){
+    fun deleteById(){
+        val user = userRepo.registerIfNotExists(registrationRequest)
 
-        userRepo.registerIfNotExists(UserRegistrationRequest("John", "email", "password", testId))
+        userRepo.deleteById(user.id)
 
-        val userJohn = User(testId, "Don", "email", "password")
+        assertThat(userRepo.getById(user.id).isPresent, Is(false))
+        assertThat(userRepo.getByUsername(user.username).isPresent, Is(false))
+    }
 
-        userRepo.update(userJohn)
+    @Test
+    fun updateUser(){
+        val registeredUser = userRepo.registerIfNotExists(registrationRequest)
 
-        assertThat(userRepo.getById(testId).get().username, Is("Don"))
+        val updatedUser = registeredUser.copy(email = "::new-email::")
+
+        userRepo.update(updatedUser)
+
+        assertThat(userRepo.getById(registeredUser.id).get(), Is(updatedUser))
     }
 }
