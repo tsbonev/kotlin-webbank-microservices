@@ -28,7 +28,7 @@ class DatastoreUsersTest {
     fun returnRegisteredUser(){
         val user = userRepo.registerIfNotExists(registrationRequest)
 
-        assertThat(userRepo.getById(user.id).get() == user, Is(true))
+        assertThat(userRepo.getById(user.id).get(), Is(user))
     }
 
     @Test(expected = UserAlreadyExistsException::class)

@@ -1,16 +1,17 @@
 package com.clouway.bankapp.adapter.gae.memcache
 
-import com.clouway.bankapp.core.*
+import com.clouway.bankapp.core.Cache
+import com.clouway.bankapp.core.User
 import com.clouway.entityhelper.TypedEntity
 import com.google.appengine.api.datastore.Entity
 import com.google.appengine.api.memcache.MemcacheService
 import com.google.appengine.api.memcache.MemcacheServiceFactory
-import java.util.*
+import java.util.Optional
 
 /**
  * @author Tsvetozar Bonev (tsbonev@gmail.com)
  */
-class MemcacheUsers(private val origin: Users) : Users {
+class MemcacheUsers : Cache<User> {
 
     private val ID_PREFIX = "user"
     private val USER_KIND = "User"
@@ -18,42 +19,25 @@ class MemcacheUsers(private val origin: Users) : Users {
     private val service: MemcacheService
         get() = MemcacheServiceFactory.getMemcacheService()
 
-    override fun update(user: User) {
-        origin.update(user)
-        val userEntity = mapUserToEntity(user)
-        service.put(key(user.username), userEntity)
-        service.put(key(user.id), userEntity)
+    override fun put(obj: User): User {
+        val userEntity = mapUserToEntity(obj)
+        service.put(prefixKey(obj.id), userEntity)
+        service.put(prefixKey(obj.username), userEntity)
+        return obj
     }
 
-    override fun getByUsername(username: String): Optional<User> {
-        val userEntity = service.get(key(username)) ?: return origin.getByUsername(username)
-        return Optional.of(mapEntityToUser(userEntity as Entity))
+    override fun get(key: String): Optional<User> {
+        val cachedUser = service.get(prefixKey(key)) ?: return Optional.empty()
+        return Optional.of(mapEntityToUser(cachedUser as Entity))
     }
 
-    override fun getById(id: String): Optional<User> {
-        val userEntity = service.get(key(id)) ?: return origin.getById(id)
-        return Optional.of(mapEntityToUser(userEntity as Entity))
+    override fun remove(key: String) {
+        val cachedUser = mapEntityToUser(service.get(prefixKey(key)) as Entity)
+        service.delete(prefixKey(cachedUser.username))
+        service.delete(prefixKey(cachedUser.id))
     }
 
-    override fun deleteById(id: String) {
-        val possibleUser = getById(id)
-
-        if(possibleUser.isPresent){
-            origin.deleteById(id)
-            service.delete(key(possibleUser.get().username))
-            service.delete(key(id))
-        }
-    }
-
-    override fun registerIfNotExists(registerRequest: UserRegistrationRequest): User {
-        val user = origin.registerIfNotExists(registerRequest)
-        val userEntity = mapUserToEntity(user)
-        service.put(key(user.username), userEntity)
-        service.put(key(user.id), userEntity)
-        return user
-    }
-
-    private fun key(key: Any): String{
+    private fun prefixKey(key: Any): String{
         return "${ID_PREFIX}_$key"
     }
 
