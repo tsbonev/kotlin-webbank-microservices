@@ -31,6 +31,13 @@
         </web>
     </module>
 
+    <module>
+        <web>
+            <web-uri>transaction-listener-1.0-SNAPSHOT</web-uri>
+            <context-root>transaction-listener</context-root>
+        </web>
+    </module>
+
     <library-directory>lib</library-directory>
 
 </application>
